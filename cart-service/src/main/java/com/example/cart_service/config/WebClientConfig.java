@@ -9,7 +9,7 @@ public class WebClientConfig {
     @Bean
     public WebClient productWebClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("http://product-service:8080/api/products")
+                .baseUrl("http://product-service:8081/api/products")
                 .build();
     }
 }

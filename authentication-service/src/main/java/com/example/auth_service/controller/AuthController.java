@@ -1,11 +1,16 @@
 package com.example.auth_service.controller;
 
+import com.example.auth_service.entity.User;
 import com.example.auth_service.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,7 +23,7 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public String register(@RequestBody com.example.auth_service.dto.AuthRequest request) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody com.example.auth_service.dto.AuthRequest request) {
         return authService.register(request);
     }
 
@@ -38,7 +43,7 @@ public class AuthController {
     }
 
     @GetMapping("/hello")
-    public String helloSecured(HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> helloSecured(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         String token = null;
         if (cookies != null) {
@@ -50,9 +55,16 @@ public class AuthController {
             }
         }
         if (token == null || !jwtUtil.validateToken(token)) {
-            return "Chưa đăng nhập hoặc token không hợp lệ!";
+            Cookie cookie = new Cookie("token", null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0); // Xóa cookie
+            response.addCookie(cookie);
+            return ResponseEntity.status(401).body(Map.of("message", "Chưa đăng nhập hoặc token không hợp lệ!"));
         }
         String username = jwtUtil.getUsernameFromToken(token);
-        return "Xin chào, " + username + "! Bạn đã xác thực thành công.";
-    }
+        User user = authService.getUserByUsername(username);
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "userId", user.getId().toString()
+        ));    }
 }

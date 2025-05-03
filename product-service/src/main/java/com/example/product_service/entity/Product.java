@@ -5,14 +5,14 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "products")
 public class Product {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private int price;
 
     @Column(name = "price_old")
-    private int priceOld;
+    private Integer priceOld;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category")
@@ -31,8 +31,8 @@ public class Product {
     public void setName(String name) { this.name = name; }
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
-    public int getPriceOld() { return priceOld; }
-    public void setPriceOld(int priceOld) { this.priceOld = priceOld; }
+    public Integer getPriceOld() { return priceOld; }
+    public void setPriceOld(Integer priceOld) { this.priceOld = priceOld; }
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
     public String getBrand() { return brand; }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -39,7 +40,7 @@ public class ProductController {
                 product.getName(),
                 product.getPrice(),
                 product.getPriceOld(),
-                product.getCategory().getName(),
+                product.getCategory().getId(),
                 product.getBrand(),
                 product.getImg(),
                 product.getDescription()
@@ -48,14 +49,15 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody Product product) {
         Product saved = productService.saveProduct(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.convertToDTO(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
         Product product = productService.getProductById(id);
+        product.setId(updatedProduct.getId());
         product.setName(updatedProduct.getName());
         product.setPrice(updatedProduct.getPrice());
         product.setPriceOld(updatedProduct.getPriceOld());
@@ -63,7 +65,8 @@ public class ProductController {
         product.setBrand(updatedProduct.getBrand());
         product.setImg(updatedProduct.getImg());
         product.setDescription(updatedProduct.getDescription());
-        return ResponseEntity.ok(productService.saveProduct(product));
+        Product updated = productService.saveProduct(product);
+        return ResponseEntity.ok(productService.convertToDTO(updated));
     }
 
     @DeleteMapping("/{id}")

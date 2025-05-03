@@ -6,8 +6,12 @@ import com.example.auth_service.entity.User;
 import com.example.auth_service.repository.UserRepository;
 import com.example.auth_service.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -21,7 +25,7 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public String register(AuthRequest request) {
+    public ResponseEntity<Map<String, String>> register(AuthRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username đã tồn tại");
         }
@@ -30,7 +34,11 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
         userRepository.save(user);
-        return "Đăng ký thành công";
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đăng ký thành công");
+
+        // Trả về thông tin dưới dạng JSON
+        return ResponseEntity.ok(response);
     }
 
     public AuthResponse login(AuthRequest request) {
@@ -43,5 +51,10 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(token);
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

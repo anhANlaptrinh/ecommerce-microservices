@@ -1,8 +1,8 @@
 function initStore() {
-  const request1 = fetch('./data/Products.json').then((response) =>
+  const request1 = fetch('http://localhost:8081/api/products').then((response) =>
     response.json()
   );
-  const request2 = fetch('./data/Categories.json').then((response) =>
+  const request2 = fetch('http://localhost:8081/api/categories').then((response) =>
     response.json()
   );
   Promise.all([request1, request2])
@@ -160,4 +160,43 @@ function generateFilterCategory(listCategories) {
                           </li>`;
   });
 }
+
+document.getElementById('filter-button').addEventListener('click', () => {
+  const selectedBrands = Array.from(document.querySelectorAll('input[name="brand-filter"]:checked')).map(el => el.nextElementSibling.textContent.trim());
+  const selectedCategories = Array.from(document.querySelectorAll('input[name="category-filter"]:checked')).map(el => el.nextElementSibling.textContent.trim());
+  const priceRanges = Array.from(document.querySelectorAll('input[name="price-filter"]:checked')).map(el => el.id);
+
+  let minPrice = null, maxPrice = null;
+  if (priceRanges.includes('price-range-0')) {
+    minPrice = 0; maxPrice = 1000000;
+  } else if (priceRanges.includes('price-range-1')) {
+    minPrice = 1000000; maxPrice = 2000000;
+  } else if (priceRanges.includes('price-range-2')) {
+    minPrice = 2000000; maxPrice = 3000000;
+  } else if (priceRanges.includes('price-range-3')) {
+    minPrice = 3000000; maxPrice = 4000000;
+  } else if (priceRanges.includes('price-range-4')) {
+    minPrice = 4000000; maxPrice = 999999999;
+  }
+
+  // Tạo query string
+  const queryParams = new URLSearchParams();
+  selectedBrands.forEach(brand => queryParams.append('brands', brand));
+  selectedCategories.forEach(cat => {
+    // Chuyển tên thành ID nếu cần (ở đây bạn có thể ánh xạ theo listCategories)
+    const found = listCategories.find(c => c.name === cat);
+    if (found) queryParams.append('categories', found.id);
+  });
+  if (minPrice !== null) queryParams.append('minPrice', minPrice);
+  if (maxPrice !== null) queryParams.append('maxPrice', maxPrice);
+
+  fetch(`http://localhost:8081/api/products/filter?${queryParams.toString()}`)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.querySelector('.product-list-store');
+      container.innerHTML = ''; // clear cũ
+      generateStoreProduct(data); // dùng lại hàm render
+    });
+});
+
 initStore();

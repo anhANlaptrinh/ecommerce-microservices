@@ -26,7 +26,7 @@ public class ProductService {
                         p.getName(),
                         p.getPrice(),
                         p.getPriceOld(),
-                        p.getCategory().getName(),
+                        p.getCategory().getId(),
                         p.getBrand(),
                         p.getImg(),
                         p.getDescription()
@@ -46,14 +46,14 @@ public class ProductService {
     }
 
     // Chuyển đổi từ entity sang DTO
-    private ProductDTO convertToDTO(Product product) {
-        String categoryName = (product.getCategory() != null) ? product.getCategory().getName() : null;
+    public ProductDTO convertToDTO(Product product) {
+        Long categoryId = (product.getCategory() != null) ? product.getCategory().getId() : null;
         return new ProductDTO(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
                 product.getPriceOld(),
-                categoryName,
+                categoryId,
                 product.getBrand(),
                 product.getImg(),
                 product.getDescription()

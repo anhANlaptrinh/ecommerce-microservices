@@ -1,26 +1,31 @@
 // src/main/java/com/example/product_service/dto/ProductDTO.java
 package com.example.product_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDTO {
     private Long id;
     private String name;
     private int price;
-    private int priceOld;
-    private String categoryName;
+
+    @JsonProperty("price_old")
+    private Integer priceOld;
+
+    private Long category;
     private String brand;
     private String img;
     private String description;
 
-    public ProductDTO() {}
-
-    public ProductDTO(Long id, String name, int price, int priceOld,
-                      String categoryName, String brand,
+    public ProductDTO(Long id, String name, int price, Integer priceOld,
+                      Long category, String brand,
                       String img, String description) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.priceOld = priceOld;
-        this.categoryName = categoryName;
+        this.category = category;
         this.brand = brand;
         this.img = img;
         this.description = description;
@@ -33,10 +38,10 @@ public class ProductDTO {
     public void setName(String name) { this.name = name; }
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
-    public int getPriceOld() { return priceOld; }
-    public void setPriceOld(int priceOld) { this.priceOld = priceOld; }
-    public String getCategoryName() { return categoryName; }
-    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public Integer getPriceOld() { return priceOld; }
+    public void setPriceOld(Integer priceOld) { this.priceOld = priceOld; }
+    public Long getCategory() { return category; }
+    public void setCategoryName(Long category) { this.category = category; }
     public String getBrand() { return brand; }
     public void setBrand(String brand) { this.brand = brand; }
     public String getImg() { return img; }

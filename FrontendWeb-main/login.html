@@ -150,11 +150,7 @@
                 <div class="login-form">
                   <form action="" class="frm-login">
                     <div class="form-group row align-items-center mb-4">
-                      <label
-                        for="email"
-                        class="col-12 col-sm-12 col-md-3 col-form-label"
-                        >Email</label
-                      >
+                      <label for="email" class="col-12 col-sm-12 col-md-3 col-form-label">Email</label>
                       <div class="col-12 col-sm-12 col-md-9">
                         <input
                           type="email"
@@ -201,7 +197,27 @@
                       </button>
                     </div>
                     <div class="text-center pt-20 top-bordered">
-                      <p>Chưa có tài khoản? <a href="">Đăng kí</a></p>
+                      <p>Chưa có tài khoản? <a href="#" id="show-register">Đăng kí</a></p>
+                    </div>
+                  </form>
+                  <form action="" class="frm-register" style="display: none;">
+                    <div class="form-group row align-items-center mb-4">
+                      <label for="register-email" class="col-12 col-sm-12 col-md-3 col-form-label">Email</label>
+                      <div class="col-12 col-sm-12 col-md-9">
+                        <input type="email" class="form-control" id="register-email" autocomplete="off" placeholder="Email" required />
+                      </div>
+                    </div>
+                    <div class="form-group row align-items-center mb-4">
+                      <label for="register-password" class="col-12 col-sm-12 col-md-3 col-form-label">Mật khẩu</label>
+                      <div class="col-12 col-sm-12 col-md-9">
+                        <input type="password" class="form-control" id="register-password" autocomplete="off" placeholder="Mật khẩu" required />
+                      </div>
+                    </div>
+                    <div class="register-box mt-5 text-center">
+                      <button type="submit" class="btn btn-login mb-4 mt-4">Đăng ký</button>
+                    </div>
+                    <div class="text-center pt-20 top-bordered">
+                      <p>Đã có tài khoản? <a href="#" id="show-login">Đăng nhập</a></p>
                     </div>
                   </form>
                 </div>

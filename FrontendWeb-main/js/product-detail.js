@@ -1,6 +1,6 @@
 function initProductDetail() {
   //Fetch dữ liệu từ file json
-  fetch('./data/Products.json')
+  fetch("http://localhost:8081/api/products")
     .then((response) => response.json())
     .then((response) => {
       listProducts = response;

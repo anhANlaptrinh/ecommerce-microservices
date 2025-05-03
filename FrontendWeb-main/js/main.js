@@ -24,10 +24,10 @@ let listCategories = [];
 let listBlogs = [];
 function initApp() {
   //Fetch dữ liệu từ file json
-  const request1 = fetch('./data/Products.json').then((response) =>
+  const request1 = fetch('http://localhost:8081/api/products').then((response) =>
     response.json()
   );
-  const request2 = fetch('./data/Categories.json').then((response) =>
+  const request2 = fetch('http://localhost:8081/api/categories').then((response) =>
     response.json()
   );
   const request3 = fetch('./data/Blogs.json').then((response) =>
@@ -397,109 +397,304 @@ function getProductById(id) {
  * @param productId
  */
 function addToCart(productId) {
-  let cart = JSON.parse(localStorage.getItem('cart')); //Láy sản phẩm từ localStorage
-  positionInCart = cart.findIndex((item) => item.productId == productId); //Tìm vị trí của sản phẩm trong giỏ hàng
-  const input_quantity = document.getElementById('quantity');
-  const quantity = input_quantity ? Number(input_quantity.value) : 1; //Nếu có input số lượng sp thì lấy số lượng sản phẩm của input còn không thì số lương sp = 1
-  if (cart.length <= 0) {
-    //Nếu giỏ hàng chưa có sản phẩm nào thì thêm sp vào cart
-    cart.push({
-      productId: productId,
-      quantity: quantity,
+  // 1. Gửi request xác thực (cookie đã kèm theo)
+  fetch('http://localhost:8080/api/auth/hello', {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Chưa đăng nhập hoặc token hết hạn');
+    return res.json();
+  })
+  .then(data => {
+    const userId = data.userId;
+    const input_quantity = document.getElementById('quantity');
+    const quantity = input_quantity ? Number(input_quantity.value) : 1;
+
+    // 2. Gọi API thêm sản phẩm vào giỏ hàng
+    return fetch('http://localhost:8082/api/cart/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-USER-ID': userId
+      },
+      body: JSON.stringify({
+        productId: productId,
+        quantity: quantity
+      })
     });
-  } else if (positionInCart < 0) {
-    //Nếu không tìm tháy sp nào trùng với sp được thêm thì thêm sp vào cart
-    cart.push({
-      productId: productId,
-      quantity: quantity,
-    });
-  } else {
-    cart[positionInCart].quantity += quantity; // Tìm thấy sp trong giỏ hàng thì + quanity
-  }
-  localStorage.setItem('cart', JSON.stringify(cart)); //Lưu cart vào localStorage
-  loadCartToHTML(); //Render lại giao diện
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Thêm vào giỏ thất bại');
+    return res.json();
+  })
+  .then(() => {
+    loadCartToHTML(); // Cập nhật giỏ
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+    window.location.href = 'login.html';
+  });
 }
 
-function deleteCart(id) {
-  let cart = JSON.parse(localStorage.getItem('cart'));
-  cart = cart.filter((item) => item.productId != id);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  loadCartToHTML();
+function deleteCart(productId) {
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    alert("Bạn cần đăng nhập để thao tác giỏ hàng!");
+    return;
+  }
+
+  fetch(`http://localhost:8082/api/cart/items/${productId}`, {
+    method: 'DELETE',
+    headers: {
+      'X-USER-ID': userId
+    }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Không thể xóa sản phẩm");
+      return res.json();
+    })
+    .then(cart => {
+      if (cart.items.length === 0) {
+        // Nếu giỏ trống, gọi API xoá giỏ luôn
+        return fetch('http://localhost:8082/api/cart', {
+          method: 'DELETE',
+          headers: {
+            'X-USER-ID': userId
+          }
+        });
+      }
+    })
+    .finally(() => {
+      loadCartToHTML();
+    })
+    .catch(err => {
+      console.error("❌ Lỗi khi xóa sản phẩm:", err);
+      alert("Không thể xóa sản phẩm. Thử lại!");
+    });
 }
+
 /**
  * Hàm này dùng để render ra giao diện giỏ hàng
  */
 function loadCartToHTML() {
-  if (!localStorage.getItem('cart')) {
-    //Khởi tạo cart nếu chưa có
-    localStorage.setItem('cart', '[]');
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    document.querySelector('.cart-count').textContent = 0;
+    document.querySelector('.cart-list').textContent = 'Bạn chưa đăng nhập';
+    document.querySelector('.total-price').textContent = '0đ';
+    return;
   }
-  let cart = JSON.parse(localStorage.getItem('cart'));
-  const cart_count = document.querySelector('.cart-count');
-  //Tổng số sp trong giỏ hàng
-  cart_count.textContent = cart.reduce((prev, current) => {
-    return prev + current.quantity;
-  }, 0);
-  const cart_list = document.querySelector('.cart-list');
-  const total_price = document.querySelector('.total-price');
-  let sum = 0;
-  cart_list.innerHTML = '';
-  if (cart.length <= 0) {
-    //Chưa thêm vào giỏ hàng thì xuât hiển thị
-    cart_list.textContent = 'Bạn chưa thêm sản phẩm';
-  }
-  //Render HTML giỏ hàng
-  cart.forEach((item) => {
-    let product = getProductById(item.productId);
-    let newHTML = `<li class="cart-item">
-    <div class="cart-image">
-      <a href="product-detail.html?id=${product.id}">
-        <img
-          src="${product.img}"
-        />
-      </a>
-    </div>
-    <div class="cart-info">
-      <h4><a href="product-detail.html?id=${product.id}">${
-      product.name
-    } </a></h4>
-      <span
-        >${item.quantity} x
-        <span>${formatVND(product.price)}</span>
-      </span>
-    </div>
-    <div class="del-icon" onclick="deleteCart(${item.productId})">
-      <i class="bi bi-x-circle"></i>
-    </div>
-  </li>`;
-    cart_list.innerHTML += newHTML;
-    sum += item.quantity * product.price;
-  });
-  total_price.textContent = formatVND(sum);
+
+  fetch('http://localhost:8082/api/cart', {
+    headers: {
+      'X-USER-ID': userId
+    }
+  })
+    .then(response => {
+      if (!response.ok) throw new Error('Không thể lấy giỏ hàng');
+      return response.json();
+    })
+    .then(cart => {
+      const cart_count = document.querySelector('.cart-count');
+      const cart_list = document.querySelector('.cart-list');
+      const total_price = document.querySelector('.total-price');
+
+      cart_count.textContent = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      cart_list.innerHTML = '';
+      let sum = 0;
+
+      if (cart.items.length === 0) {
+        cart_list.textContent = 'Bạn chưa thêm sản phẩm';
+      } else {
+        cart.items.forEach(item => {
+          const product = getProductById(item.productId); // lấy từ listProducts đã fetch sẵn
+          if (!product) return;
+
+          sum += product.price * item.quantity;
+
+          cart_list.innerHTML += `
+            <li class="cart-item">
+              <div class="cart-image">
+                <a href="product-detail.html?id=${product.id}">
+                  <img src="${product.img}" />
+                </a>
+              </div>
+              <div class="cart-info">
+                <h4><a href="product-detail.html?id=${product.id}">${product.name}</a></h4>
+                <span>${item.quantity} x <span>${formatVND(product.price)}</span></span>
+              </div>
+              <div class="del-icon" onclick="deleteCart(${product.id})">
+                <i class="bi bi-x-circle"></i>
+              </div>
+            </li>`;
+        });
+      }
+      total_price.textContent = formatVND(sum);
+    })
+    .catch(error => {
+      console.error('❌ Lỗi khi load giỏ hàng:', error);
+      document.querySelector('.cart-list').textContent = 'Không thể hiển thị giỏ hàng';
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Lấy form đăng nhập
   const loginForm = document.querySelector(".frm-login");
+  const registerForm = document.querySelector(".frm-register");
+  const showRegisterLink = document.getElementById("show-register");
+  const showLoginLink = document.getElementById("show-login");
+  const title = document.querySelector(".section-title");
+
+  // Chuyển từ form đăng nhập sang form đăng ký
+  if (showRegisterLink) {
+    showRegisterLink.addEventListener("click", function () {
+      loginForm.style.display = "none";
+      registerForm.style.display = "block";
+      title.textContent = "Đăng ký";
+    });
+  }
+
+  // Chuyển từ form đăng ký sang form đăng nhập
+  if (showLoginLink) {
+    showLoginLink.addEventListener("click", function () {
+      registerForm.style.display = "none";
+      loginForm.style.display = "block";
+      title.textContent = "Đăng nhập";
+    });
+  }
 
   if (loginForm) {
-      loginForm.addEventListener("submit", function (event) {
-          event.preventDefault(); // Ngăn chặn reload trang
-
-          // Lấy giá trị email và password
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-
-          // Kiểm tra nếu là tài khoản admin
-          if (email === "admin@gmail.com" && password === "admin123") {
-              window.location.href = "dashboard.html"; // Chuyển trang nếu đúng
+    loginForm.addEventListener("submit", function (event) {
+      event.preventDefault(); // Ngăn chặn reload trang
+  
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+  
+      // Kiểm tra nếu là tài khoản admin
+      if (email === "admin@gmail.com" && password === "admin123") {
+        window.location.href = "dashboard.html"; // Chuyển trang nếu đúng
+      } else {
+        localStorage.removeItem("username");
+        // Gửi yêu cầu đến backend để xác thực với các tài khoản khác
+        fetch("http://localhost:8080/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ username: email, password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("👉 Kết quả trả về từ backend login:", data);
+          if (data.token) {
+            console.log("✅ Nhận được token:", data.token);
+            // Lấy tên người dùng từ email (phần trước dấu @)
+            const username = email.split('@')[0];
+            localStorage.setItem("username", username);
+  
+            // Cập nhật giao diện và thay đổi chữ "Đăng nhập" thành tên người dùng
+            updateLoginText(username);
+  
+            // Chuyển đến trang chính sau khi đăng nhập
+            //window.location.href = "index.html";
           } else {
-              // Hiển thị thông báo lỗi trong HTML thay vì alert
-              const errorMessage = document.getElementById("validate-password");
-              errorMessage.textContent = "Email hoặc mật khẩu không đúng!";
+            console.warn("⚠ Không có token trả về, dữ liệu:", data);
+            const errorMessage = document.getElementById("validate-password");
+            errorMessage.textContent = "Email hoặc mật khẩu không đúng!";
           }
+        })
+        .catch(error => {
+          console.error("Có lỗi xảy ra khi xác thực:", error);
+          const errorMessage = document.getElementById("validate-password");
+          errorMessage.textContent = "Lỗi kết nối với server!";
+        });
+      }
+    });
+  }  
+
+  // Xử lý đăng ký
+  if (registerForm) {
+    registerForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("register-email").value;
+      const password = document.getElementById("register-password").value;
+
+      fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: email, password: password, role: "USER" }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert("Đăng ký thành công!");
+          loginForm.style.display = "block";
+          registerForm.style.display = "none";
+        } else {
+          alert(data.message || "Đã xảy ra lỗi khi đăng ký!");
+        }
+      })
+      .catch(error => {
+        console.error("Có lỗi xảy ra khi đăng ký:", error);
       });
+    });
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("http://localhost:8080/api/auth/hello", {
+    method: "GET",
+    credentials: "include"
+  })
+  .then(response => {
+      if (!response.ok) {
+        throw new Error("Unauthorized");
+      }
+      return response.json();
+  })
+  .then(data => {
+    if (data.username) {
+      const username = data.username.split('@')[0];
+      localStorage.setItem("username", username);
+      localStorage.setItem("userId", parseInt(data.userId));
+      updateLoginText(username);  // Hiển thị tên người dùng
+    } else {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userId");
+      updateLoginText("Đăng nhập");  // Hiển thị lại "Đăng nhập" nếu có lỗi
+    }
+  })
+  .catch(error => {
+    console.error("Lỗi khi lấy thông tin người dùng:", error);
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    updateLoginText("Đăng nhập");  // Hiển thị lại "Đăng nhập" nếu có lỗi
+  });
+});
+
+// Hàm để cập nhật giao diện với tên người dùng hoặc chữ "Đăng nhập"
+function updateLoginText(username) {
+  const loginElements = document.querySelectorAll('.login');
+
+  loginElements.forEach(element => {
+    const loginText = element.querySelector('span') || element;
+
+    if (loginText) {
+      if (username && username !== "Đăng nhập") {
+        loginText.textContent = "Name: " + username;
+      } else {
+        loginText.textContent = "Đăng nhập";
+      }
+    }
+  });
+}
+
 
 initApp();

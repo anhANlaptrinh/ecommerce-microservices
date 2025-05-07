@@ -1,0 +1,21 @@
+-- Tạo bảng carts
+CREATE TABLE carts (
+    id BIGSERIAL PRIMARY KEY,
+    cart_id VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tạo bảng cart_items
+CREATE TABLE cart_items (
+    id BIGSERIAL PRIMARY KEY,
+    cart_id VARCHAR(255) NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cart FOREIGN KEY (cart_id) REFERENCES carts(cart_id) ON DELETE CASCADE
+);

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: ./authentication-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    networks:
+      - ecommerce-network
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - auth-service
+    networks:
+      - ecommerce-network
+
+  cart-service:
+    build: ./cart-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - product-service
+    networks:
+      - ecommerce-network
+
+  frontend:
+    build: ./FrontendWeb-main
+    ports:
+      - "9999:80"
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge

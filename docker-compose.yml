@@ -32,6 +32,15 @@ services:
     networks:
       - ecommerce-network
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    networks:
+      - ecommerce-network
+
   frontend:
     build: ./FrontendWeb-main
     ports:

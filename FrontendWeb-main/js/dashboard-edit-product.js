@@ -1,5 +1,5 @@
 function initDashBoardProduct() {
-  fetch("http://localhost:8081/api/products")
+  fetch("http://localhost:8888/api/products")
     .then((response) => response.json())
     .then((response) => {
       listProducts = response;

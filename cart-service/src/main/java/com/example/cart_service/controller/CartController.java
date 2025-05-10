@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {

@@ -1,3 +1,3 @@
-output "jenkins_master_ip" {
-  value = aws_eip.jenkins_eip.public_ip
+output "public_ip" {
+  value = aws_instance.jenkins_master.public_ip
 }

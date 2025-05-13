@@ -11,3 +11,10 @@ module "jenkins_agent" {
   instance_type = var.instance_type
   key_name      = var.key_name
 }
+
+module "dns" {
+  source        = "./modules/route53"
+  domain_name   = var.domain_name
+  master_ip     = module.jenkins_master.public_ip
+  agent_ip      = module.jenkins_agent.public_ip
+}

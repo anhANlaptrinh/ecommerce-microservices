@@ -1,7 +1,7 @@
 output "jenkins_master_dns" {
-  value = module.dns.master_dns
+  value = "master.${var.domain_name}"
 }
 
 output "jenkins_agent_dns" {
-  value = module.dns.agent_dns
+  value = "agent.${var.domain_name}"
 }

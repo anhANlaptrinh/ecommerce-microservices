@@ -10,6 +10,11 @@ pipeline {
                 cleanWs()
             }
         }
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Maven Compile') {
             steps {
                 dir('authentication-service') {

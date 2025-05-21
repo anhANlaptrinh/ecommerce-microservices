@@ -1,9 +1,14 @@
 pipeline {
     agent any
     tools {
-        jdk 'JDK21'        // Đảm bảo JDK21 đã được cấu hình trong Jenkins
-        maven 'maven3'     // Đảm bảo Maven 3 đã cài
+        jdk 'JDK21'
+        maven 'maven3'
     }
+
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
     stages {
         stage('Clean Workspace') {
             steps {
@@ -40,6 +45,28 @@ pipeline {
                 dir('cart-service') {
                     sh 'mvn clean compile'
                     sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Sonarqube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        $SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=ecommerce-microservices \
+                        -Dsonar.projectName=ecommerce-microservices \
+                        -Dsonar.sources=. \
+                        -Dsonar.java.binaries=.
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
         }

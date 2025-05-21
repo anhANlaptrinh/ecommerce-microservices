@@ -1,10 +1,27 @@
 pipeline {
     agent any
-
+    tools {
+        jdk 'JDK'
+        maven 'maven3'
+    }
     stages {
-        stage('Test Build') {
+        stage('Clean Workspace') {
             steps {
-                echo 'Pipeline hoạt động OK rồi nè!'
+                cleanWs()
+            }
+        }
+        stage('Maven Compile') {
+            steps {
+                dir('authentication-service') {
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+        stage('Maven Test') {
+            steps {
+                dir('authentication-service') {
+                    sh 'mvn test'
+                }
             }
         }
     }

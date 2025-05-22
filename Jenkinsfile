@@ -106,7 +106,7 @@ pipeline {
                     dir('FrontendWeb-main') {
                         withSonarQubeEnv('sonarqube') {
                             sh """
-                                $SCANNER_HOME/bin/sonar-scanner
+                                $SCANNER_HOME/bin/sonar-scanner -Dsonar.coverage.jacoco.reportPaths=disabled
                             """
                         }
                     }

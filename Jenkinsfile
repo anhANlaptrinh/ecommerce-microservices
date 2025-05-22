@@ -78,18 +78,37 @@ pipeline {
             }
         }
 
-        stage('Sonarqube Analysis') {
-                    steps {
-                        withSonarQubeEnv('sonarqube') {
-                            sh '''
-                                $SCANNER_HOME/bin/sonar-scanner \
-                                -Dsonar.projectKey=ecommerce-microservices \
-                                -Dsonar.projectName=ecommerce-microservices \
-                                -Dsonar.sources=. \
-                                -Dsonar.java.binaries=.
-                            '''
+        stage('SonarQube Scan') {
+            steps {
+                script {
+                    def services = ['authentication-service', 'product-service', 'cart-service']
+                    for (svc in services) {
+                        dir(svc) {
+                            withSonarQubeEnv('sonarqube') {
+                                sh """
+                                    $SCANNER_HOME/bin/sonar-scanner \
+                                    -Dsonar.projectKey=${svc} \
+                                    -Dsonar.projectName="${svc}" \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                            sh 'rm -rf target'
                         }
                     }
+
+                    dir('FrontendWeb-main') {
+                        withSonarQubeEnv('sonarqube') {
+                            sh """
+                                $SCANNER_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=frontend \
+                                -Dsonar.projectName="Frontend Web"
+                            """
+                        }
+                    }
+                }
+            }
         }
 
         stage('Quality Gate') {
@@ -99,6 +118,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {

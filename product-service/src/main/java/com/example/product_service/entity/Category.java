@@ -12,6 +12,14 @@ public class Category {
     private String name;
     private String img;
 
+    public Category() {} // constructor mặc định
+
+    public Category(Long id, String name, String img) {
+        this.id = id;
+        this.name = name;
+        this.img = img;
+    }
+
     // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

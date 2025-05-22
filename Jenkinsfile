@@ -106,7 +106,14 @@ pipeline {
                     dir('FrontendWeb-main') {
                         withSonarQubeEnv('sonarqube') {
                             sh """
-                                $SCANNER_HOME/bin/sonar-scanner -Dsonar.coverage.jacoco.reportPaths=disabled
+                                $SCANNER_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=frontend-web \
+                                -Dsonar.projectName=frontend-web \
+                                -Dsonar.sources=. \
+                                -Dsonar.sourceEncoding=UTF-8 \
+                                -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,**/*.spec.js,**/*.test.js \
+                                -Dsonar.coverage.jacoco.reportPaths=disabled \
+                                -Dsonar.projectVersion=${BUILD_NUMBER}
                             """
                         }
                     }

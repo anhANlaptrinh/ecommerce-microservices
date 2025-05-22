@@ -15,13 +15,15 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 public class CategoryControllerTest {
+
+    private static final String NAME_LAPTOP = "Laptop";
+    private static final String NAME_PHONE = "Phone";
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,8 +36,8 @@ public class CategoryControllerTest {
 
     @Test
     public void testGetAllCategories() throws Exception {
-        Category c1 = new Category(1L, "Laptop", "img1");
-        Category c2 = new Category(2L, "Phone", "img2");
+        Category c1 = new Category(1L, NAME_LAPTOP, "img1");
+        Category c2 = new Category(2L, NAME_PHONE, "img2");
 
         when(categoryService.getAllCategories()).thenReturn(List.of(c1, c2));
 
@@ -46,18 +48,18 @@ public class CategoryControllerTest {
 
     @Test
     public void testGetCategoryById() throws Exception {
-        Category c = new Category(1L, "Laptop", "img1");
+        Category c = new Category(1L, NAME_LAPTOP, "img1");
         when(categoryService.getCategoryById(1L)).thenReturn(c);
 
         mockMvc.perform(get("/api/categories/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Laptop"));
+                .andExpect(jsonPath("$.name").value(NAME_LAPTOP));
     }
 
     @Test
     public void testCreateCategory() throws Exception {
-        Category c = new Category(null, "Phone", "img1");
-        Category saved = new Category(10L, "Phone", "img1");
+        Category c = new Category(null, NAME_PHONE, "img1");
+        Category saved = new Category(10L, NAME_PHONE, "img1");
 
         when(categoryService.saveCategory(any(Category.class))).thenReturn(saved);
 

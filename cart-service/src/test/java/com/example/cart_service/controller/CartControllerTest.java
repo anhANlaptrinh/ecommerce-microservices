@@ -8,7 +8,6 @@ import com.example.cart_service.service.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,6 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestSecurityConfig.class)
 public class CartControllerTest {
 
+    private static final Long USER_ID = 123L;
+    private static final String HEADER_USER_ID = "X-USER-ID";
+    private static final String PATH_ITEMS = "$.items";
+    private static final String PATH_ITEM_PRODUCT_ID = "$.items[0].productId";
+    private static final String PATH_TOTAL_AMOUNT = "$.totalAmount";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -38,8 +43,6 @@ public class CartControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    private final Long userId = 123L;
 
     private CartDTO mockCartDTO() {
         CartItemDTO item = new CartItemDTO();
@@ -53,7 +56,6 @@ public class CartControllerTest {
         CartDTO cart = new CartDTO();
         cart.setItems(Collections.singletonList(item));
         cart.setTotalAmount(200);
-
         return cart;
     }
 
@@ -63,59 +65,59 @@ public class CartControllerTest {
         req.setProductId(1L);
         req.setQuantity(2);
 
-        when(cartService.addItem(eq(userId), any(AddItemRequest.class)))
+        when(cartService.addItem(eq(USER_ID), any(AddItemRequest.class)))
                 .thenReturn(mockCartDTO());
 
         mockMvc.perform(post("/api/cart/items")
-                        .header("X-USER-ID", userId)
+                        .header(HEADER_USER_ID, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items[0].productId").value(1L))
-                .andExpect(jsonPath("$.totalAmount").value(200));
+                .andExpect(jsonPath(PATH_ITEMS).isArray())
+                .andExpect(jsonPath(PATH_ITEM_PRODUCT_ID).value(1L))
+                .andExpect(jsonPath(PATH_TOTAL_AMOUNT).value(200));
     }
 
     @Test
     public void testGetCart() throws Exception {
-        when(cartService.getCart(userId)).thenReturn(mockCartDTO());
+        when(cartService.getCart(USER_ID)).thenReturn(mockCartDTO());
 
         mockMvc.perform(get("/api/cart")
-                        .header("X-USER-ID", userId))
+                        .header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items[0].productId").value(1L))
-                .andExpect(jsonPath("$.totalAmount").value(200));
+                .andExpect(jsonPath(PATH_ITEMS).isArray())
+                .andExpect(jsonPath(PATH_ITEM_PRODUCT_ID).value(1L))
+                .andExpect(jsonPath(PATH_TOTAL_AMOUNT).value(200));
     }
 
     @Test
     public void testRemoveItem() throws Exception {
-        when(cartService.removeItem(userId, 1L)).thenReturn(mockCartDTO());
+        when(cartService.removeItem(USER_ID, 1L)).thenReturn(mockCartDTO());
 
         mockMvc.perform(delete("/api/cart/items/1")
-                        .header("X-USER-ID", userId))
+                        .header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items[0].productId").value(1L))
-                .andExpect(jsonPath("$.totalAmount").value(200));
+                .andExpect(jsonPath(PATH_ITEMS).isArray())
+                .andExpect(jsonPath(PATH_ITEM_PRODUCT_ID).value(1L))
+                .andExpect(jsonPath(PATH_TOTAL_AMOUNT).value(200));
     }
 
     @Test
     public void testClearCart() throws Exception {
         mockMvc.perform(delete("/api/cart")
-                        .header("X-USER-ID", userId))
+                        .header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testDecreaseItem() throws Exception {
-        when(cartService.decreaseItem(userId, 1L)).thenReturn(mockCartDTO());
+        when(cartService.decreaseItem(USER_ID, 1L)).thenReturn(mockCartDTO());
 
         mockMvc.perform(put("/api/cart/items/1/decrease")
-                        .header("X-USER-ID", userId))
+                        .header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items[0].productId").value(1L))
-                .andExpect(jsonPath("$.totalAmount").value(200));
+                .andExpect(jsonPath(PATH_ITEMS).isArray())
+                .andExpect(jsonPath(PATH_ITEM_PRODUCT_ID).value(1L))
+                .andExpect(jsonPath(PATH_TOTAL_AMOUNT).value(200));
     }
 }

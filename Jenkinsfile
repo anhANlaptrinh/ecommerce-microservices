@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     tools {
         jdk 'JDK21'
         maven 'maven3'
@@ -16,17 +17,41 @@ pipeline {
 
     stages {
         stage('Clean Workspace') {
-                steps {
-                    cleanWs()
-                }
+            steps {
+                cleanWs()
             }
+        }
 
         stage('Checkout Source Code') {
             steps {
                 checkout scm
             }
         }
-
+        stage('Maven Compile') {
+            parallel {
+                stage('Compile Auth') {
+                    steps {
+                        dir('authentication-service') {
+                            sh 'mvn clean compile'
+                        }
+                    }
+                }
+                stage('Compile Product') {
+                    steps {
+                        dir('product-service') {
+                            sh 'mvn clean compile'
+                        }
+                    }
+                }
+                stage('Compile Cart') {
+                    steps {
+                        dir('cart-service') {
+                            sh 'mvn clean compile'
+                        }
+                    }
+                }
+            }
+        }
         stage('Test Services') {
             parallel {
                 stage('Test Auth') {
@@ -62,13 +87,17 @@ pipeline {
                                 sh '''
                                     $SCANNER_HOME/bin/sonar-scanner \
                                     -Dsonar.projectKey=auth-service \
+                                    -Dsonar.projectName="Auth Service" \
                                     -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.sourceEncoding=UTF-8
                                 '''
                             }
+                            sh 'rm -rf target'
                         }
                     }
                 }
+
                 stage('Scan Product') {
                     steps {
                         dir('product-service') {
@@ -76,13 +105,17 @@ pipeline {
                                 sh '''
                                     $SCANNER_HOME/bin/sonar-scanner \
                                     -Dsonar.projectKey=product-service \
+                                    -Dsonar.projectName="Product Service" \
                                     -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.sourceEncoding=UTF-8
                                 '''
                             }
+                            sh 'rm -rf target'
                         }
                     }
                 }
+
                 stage('Scan Cart') {
                     steps {
                         dir('cart-service') {
@@ -90,18 +123,26 @@ pipeline {
                                 sh '''
                                     $SCANNER_HOME/bin/sonar-scanner \
                                     -Dsonar.projectKey=cart-service \
+                                    -Dsonar.projectName="Cart Service" \
                                     -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.sourceEncoding=UTF-8
                                 '''
                             }
+                            sh 'rm -rf target'
                         }
                     }
                 }
+
                 stage('Scan Frontend') {
                     steps {
                         dir('FrontendWeb-main') {
                             withSonarQubeEnv('sonarqube') {
-                                sh '$SCANNER_HOME/bin/sonar-scanner'
+                                sh '''
+                                    $SCANNER_HOME/bin/sonar-scanner \
+                                    -Dsonar.projectKey=frontend \
+                                    -Dsonar.projectName="Frontend Web"
+                                '''
                             }
                         }
                     }

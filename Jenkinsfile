@@ -79,71 +79,32 @@ pipeline {
         }
 
         stage('SonarQube Scan') {
-            parallel {
-                stage('Scan Auth') {
-                    steps {
-                        dir('authentication-service') {
+            steps {
+                script {
+                    def services = ['authentication-service', 'product-service', 'cart-service']
+                    for (svc in services) {
+                        dir(svc) {
                             withSonarQubeEnv('sonarqube') {
-                                sh '''
+                                sh """
                                     $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=auth-service \
-                                    -Dsonar.projectName="Auth Service" \
+                                    -Dsonar.projectKey=${svc} \
+                                    -Dsonar.projectName="${svc}" \
                                     -Dsonar.sources=src \
                                     -Dsonar.java.binaries=target/classes \
                                     -Dsonar.sourceEncoding=UTF-8
-                                '''
+                                """
                             }
                             sh 'rm -rf target'
                         }
                     }
-                }
 
-                stage('Scan Product') {
-                    steps {
-                        dir('product-service') {
-                            withSonarQubeEnv('sonarqube') {
-                                sh '''
-                                    $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=product-service \
-                                    -Dsonar.projectName="Product Service" \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes \
-                                    -Dsonar.sourceEncoding=UTF-8
-                                '''
-                            }
-                            sh 'rm -rf target'
-                        }
-                    }
-                }
-
-                stage('Scan Cart') {
-                    steps {
-                        dir('cart-service') {
-                            withSonarQubeEnv('sonarqube') {
-                                sh '''
-                                    $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=cart-service \
-                                    -Dsonar.projectName="Cart Service" \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes \
-                                    -Dsonar.sourceEncoding=UTF-8
-                                '''
-                            }
-                            sh 'rm -rf target'
-                        }
-                    }
-                }
-
-                stage('Scan Frontend') {
-                    steps {
-                        dir('FrontendWeb-main') {
-                            withSonarQubeEnv('sonarqube') {
-                                sh '''
-                                    $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=frontend \
-                                    -Dsonar.projectName="Frontend Web"
-                                '''
-                            }
+                    dir('FrontendWeb-main') {
+                        withSonarQubeEnv('sonarqube') {
+                            sh """
+                                $SCANNER_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=frontend \
+                                -Dsonar.projectName="Frontend Web"
+                            """
                         }
                     }
                 }
@@ -157,6 +118,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {

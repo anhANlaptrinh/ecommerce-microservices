@@ -28,8 +28,8 @@ public class CartController {
         try {
             return cartService.addItem(userId, req);
         } catch (Exception e) {
-            e.printStackTrace(); // 👈 thêm dòng này để thấy lỗi rõ trong container log
-            throw e; // giữ nguyên để trả về lỗi 500
+            e.printStackTrace();
+            throw e;
         }
     }
 

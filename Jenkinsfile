@@ -27,6 +27,7 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Maven Compile') {
             parallel {
                 stage('Compile Auth') {
@@ -52,6 +53,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test Services') {
             parallel {
                 stage('Test Auth') {
@@ -81,20 +83,23 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 script {
-                    def services = ['authentication-service', 'product-service', 'cart-service']
+                    def services = [
+                        [dir: 'authentication-service', key: 'auth-service'],
+                        [dir: 'product-service', key: 'product-service'],
+                        [dir: 'cart-service', key: 'cart-service']
+                    ]
                     for (svc in services) {
-                        dir(svc) {
+                        dir(svc.dir) {
                             withSonarQubeEnv('sonarqube') {
                                 sh """
                                     $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=${svc} \
-                                    -Dsonar.projectName="${svc}" \
+                                    -Dsonar.projectKey=${svc.key} \
+                                    -Dsonar.projectName=${svc.key} \
                                     -Dsonar.sources=src \
                                     -Dsonar.java.binaries=target/classes \
                                     -Dsonar.sourceEncoding=UTF-8
                                 """
                             }
-                            sh 'rm -rf target'
                         }
                     }
 
@@ -102,8 +107,11 @@ pipeline {
                         withSonarQubeEnv('sonarqube') {
                             sh """
                                 $SCANNER_HOME/bin/sonar-scanner \
-                                -Dsonar.projectKey=frontend \
-                                -Dsonar.projectName="Frontend Web"
+                                -Dsonar.projectKey=frontend-web \
+                                -Dsonar.projectName="Frontend Web" \
+                                -Dsonar.sources=src \
+                                -Dsonar.sourceEncoding=UTF-8 \
+                                -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,**/*.spec.js,**/*.test.js
                             """
                         }
                     }
@@ -118,7 +126,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {

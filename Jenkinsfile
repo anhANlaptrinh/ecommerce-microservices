@@ -15,15 +15,15 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+                steps {
+                    cleanWs()
+                }
+            }
+
         stage('Checkout Source Code') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
             }
         }
 

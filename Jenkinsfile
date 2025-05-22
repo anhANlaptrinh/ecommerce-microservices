@@ -99,15 +99,10 @@ pipeline {
 
         stage('SonarQube - Frontend') {
             steps {
-                dir('frontend') {
+                dir('FrontendWeb-main') {
                     withSonarQubeEnv('sonarqube') {
                         sh '''
-                            $SCANNER_HOME/bin/sonar-scanner \
-                            -Dsonar.projectKey=frontend \
-                            -Dsonar.projectName=frontend \
-                            -Dsonar.sources=src \
-                            -Dsonar.exclusions=node_modules/**,dist/** \
-                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                            $SCANNER_HOME/bin/sonar-scanner
                         '''
                     }
                 }

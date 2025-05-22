@@ -106,12 +106,7 @@ pipeline {
                     dir('FrontendWeb-main') {
                         withSonarQubeEnv('sonarqube') {
                             sh """
-                                $SCANNER_HOME/bin/sonar-scanner \
-                                -Dsonar.projectKey=frontend-web \
-                                -Dsonar.projectName="Frontend Web" \
-                                -Dsonar.sources=src \
-                                -Dsonar.sourceEncoding=UTF-8 \
-                                -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,**/*.spec.js,**/*.test.js
+                                $SCANNER_HOME/bin/sonar-scanner
                             """
                         }
                     }

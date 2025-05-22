@@ -22,11 +22,27 @@ pipeline {
             }
         }
 
-        stage('Build & Test Authentication Service') {
+        stage('Build & Test Auth Service') {
             steps {
                 dir('authentication-service') {
                     sh 'mvn clean compile'
                     sh 'mvn test'
+                }
+            }
+        }
+
+        stage('SonarQube - Auth Service') {
+            steps {
+                dir('authentication-service') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh '''
+                            $SCANNER_HOME/bin/sonar-scanner \
+                            -Dsonar.projectKey=auth-service \
+                            -Dsonar.projectName=auth-service \
+                            -Dsonar.sources=src \
+                            -Dsonar.java.binaries=target/classes
+                        '''
+                    }
                 }
             }
         }
@@ -40,6 +56,22 @@ pipeline {
             }
         }
 
+        stage('SonarQube - Product Service') {
+            steps {
+                dir('product-service') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh '''
+                            $SCANNER_HOME/bin/sonar-scanner \
+                            -Dsonar.projectKey=product-service \
+                            -Dsonar.projectName=product-service \
+                            -Dsonar.sources=src \
+                            -Dsonar.java.binaries=target/classes
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Build & Test Cart Service') {
             steps {
                 dir('cart-service') {
@@ -49,16 +81,31 @@ pipeline {
             }
         }
 
-        stage('Sonarqube Analysis') {
+        stage('SonarQube - Cart Service') {
             steps {
-                withSonarQubeEnv('sonarqube') {
-                    sh '''
-                        $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectKey=ecommerce-microservices \
-                        -Dsonar.projectName=ecommerce-microservices \
-                        -Dsonar.sources=. \
-                        -Dsonar.java.binaries=.
-                    '''
+                dir('cart-service') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh '''
+                            $SCANNER_HOME/bin/sonar-scanner \
+                            -Dsonar.projectKey=cart-service \
+                            -Dsonar.projectName=cart-service \
+                            -Dsonar.sources=src \
+                            -Dsonar.java.binaries=target/classes
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube - Frontend') {
+            steps {
+                dir('FrontendWeb-main') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh '''
+                            npm install
+                            $SCANNER_HOME/bin/sonar-scanner
+                        '''
+                    }
                 }
             }
         }

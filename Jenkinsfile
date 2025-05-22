@@ -9,10 +9,21 @@ pipeline {
         SCANNER_HOME = tool 'sonar-scanner'
     }
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '7'))
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
     stages {
         stage('Checkout Source Code') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
             }
         }
 
@@ -104,6 +115,12 @@ pipeline {
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }

@@ -3,13 +3,14 @@
   become: yes
   vars:
     docker_image_name: "{{ DOCKERHUB_USERNAME }}/cart-service:latest"
+    service_path: "/home/ubuntu/agent/workspace/ecommerce-microservices/cart-service"
 
   tasks:
     - name: Login to Docker Hub
       shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Build Cart Docker image
-      command: docker build -t {{ docker_image_name }} ../cart-service
+      command: docker build -t {{ docker_image_name }} {{ service_path }}
 
     - name: Push Cart Docker image
       command: docker push {{ docker_image_name }}

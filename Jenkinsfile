@@ -55,6 +55,32 @@ pipeline {
             }
         }
 
+        /*stage('Test Services') {
+            parallel {
+                stage('Test Auth') {
+                    steps {
+                        dir('authentication-service') {
+                            sh 'mvn test'
+                        }
+                    }
+                }
+                stage('Test Product') {
+                    steps {
+                        dir('product-service') {
+                            sh 'mvn test'
+                        }
+                    }
+                }
+                stage('Test Cart') {
+                    steps {
+                        dir('cart-service') {
+                            sh 'mvn test'
+                        }
+                    }
+                }
+            }
+        }*/
+
         stage('Build Services') {
             parallel {
                 stage('Build Auth') {

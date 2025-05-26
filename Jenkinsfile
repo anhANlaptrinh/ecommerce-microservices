@@ -8,8 +8,7 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKERHUB_USERNAME = credentials('docker-username')
-        DOCKERHUB_PASSWORD = credentials('docker-password')
+        DOCKER_CREDENTIALS = credentials('docker')
     }
 
     options {
@@ -55,32 +54,6 @@ pipeline {
                 }
             }
         }
-
-        /*stage('Test Services') {
-            parallel {
-                stage('Test Auth') {
-                    steps {
-                        dir('authentication-service') {
-                            sh 'mvn test'
-                        }
-                    }
-                }
-                stage('Test Product') {
-                    steps {
-                        dir('product-service') {
-                            sh 'mvn test'
-                        }
-                    }
-                }
-                stage('Test Cart') {
-                    steps {
-                        dir('cart-service') {
-                            sh 'mvn test'
-                        }
-                    }
-                }
-            }
-        }*/
 
         stage('Build Services') {
             parallel {
@@ -169,10 +142,14 @@ pipeline {
                 stage('Deploy Auth') {
                     steps {
                         dir('ansible') {
-                            ansiblePlaybook credentialsId: 'ssh',
+                            ansiblePlaybook credentialsId: 'SSH',
                                             installation: 'ansible',
                                             inventory: '/etc/ansible/hosts',
                                             playbook: 'deploy-auth.yaml',
+                                            extraVars: [
+                                                DOCKERHUB_USERNAME: "${env.DOCKER_CREDENTIALS_USR}",
+                                                DOCKERHUB_PASSWORD: "${env.DOCKER_CREDENTIALS_PSW}"
+                                            ],
                                             disableHostKeyChecking: true
                         }
                     }
@@ -181,10 +158,14 @@ pipeline {
                 stage('Deploy Product') {
                     steps {
                         dir('ansible') {
-                            ansiblePlaybook credentialsId: 'ssh',
+                            ansiblePlaybook credentialsId: 'SSH',
                                             installation: 'ansible',
                                             inventory: '/etc/ansible/hosts',
                                             playbook: 'deploy-product.yaml',
+                                            extraVars: [
+                                                DOCKERHUB_USERNAME: "${env.DOCKER_CREDENTIALS_USR}",
+                                                DOCKERHUB_PASSWORD: "${env.DOCKER_CREDENTIALS_PSW}"
+                                            ],
                                             disableHostKeyChecking: true
                         }
                     }
@@ -193,10 +174,14 @@ pipeline {
                 stage('Deploy Cart') {
                     steps {
                         dir('ansible') {
-                            ansiblePlaybook credentialsId: 'ssh',
+                            ansiblePlaybook credentialsId: 'SSH',
                                             installation: 'ansible',
                                             inventory: '/etc/ansible/hosts',
                                             playbook: 'deploy-cart.yaml',
+                                            extraVars: [
+                                                DOCKERHUB_USERNAME: "${env.DOCKER_CREDENTIALS_USR}",
+                                                DOCKERHUB_PASSWORD: "${env.DOCKER_CREDENTIALS_PSW}"
+                                            ],
                                             disableHostKeyChecking: true
                         }
                     }
@@ -205,10 +190,14 @@ pipeline {
                 stage('Deploy Gateway') {
                     steps {
                         dir('ansible') {
-                            ansiblePlaybook credentialsId: 'ssh',
+                            ansiblePlaybook credentialsId: 'SSH',
                                             installation: 'ansible',
                                             inventory: '/etc/ansible/hosts',
                                             playbook: 'deploy-gateway.yaml',
+                                            extraVars: [
+                                                DOCKERHUB_USERNAME: "${env.DOCKER_CREDENTIALS_USR}",
+                                                DOCKERHUB_PASSWORD: "${env.DOCKER_CREDENTIALS_PSW}"
+                                            ],
                                             disableHostKeyChecking: true
                         }
                     }
@@ -217,10 +206,14 @@ pipeline {
                 stage('Deploy Frontend') {
                     steps {
                         dir('ansible') {
-                            ansiblePlaybook credentialsId: 'ssh',
+                            ansiblePlaybook credentialsId: 'SSH',
                                             installation: 'ansible',
                                             inventory: '/etc/ansible/hosts',
                                             playbook: 'deploy-frontend.yaml',
+                                            extraVars: [
+                                                DOCKERHUB_USERNAME: "${env.DOCKER_CREDENTIALS_USR}",
+                                                DOCKERHUB_PASSWORD: "${env.DOCKER_CREDENTIALS_PSW}"
+                                            ],
                                             disableHostKeyChecking: true
                         }
                     }
@@ -231,7 +224,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            node {
+                cleanWs()
+            }
         }
     }
 }

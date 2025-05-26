@@ -1,17 +1,20 @@
 - name: Deploy Auth Service
   hosts: all
   become: yes
+  vars:
+    docker_image_name: "{{ DOCKERHUB_USERNAME }}/auth-service:latest"
+
   tasks:
     - name: Login to Docker Hub
-      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+      shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Build Auth Docker image
-      command: docker build -t dohuynhan/auth-service:latest ../authentication-service
+      command: docker build -t {{ docker_image_name }} ../authentication-service
 
     - name: Push Auth Docker image
-      command: docker push dohuynhan/auth-service:latest
+      command: docker push {{ docker_image_name }}
 
     - name: Run Auth container
       shell: |
         docker rm -f auth-service || true
-        docker run -d --name auth-service -p 8080:8080 dohuynhan/auth-service:latest
+        docker run -d --name auth-service -p 8080:8080 {{ docker_image_name }}

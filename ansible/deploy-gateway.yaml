@@ -1,17 +1,20 @@
 - name: Deploy API Gateway
   hosts: all
   become: yes
+  vars:
+    docker_image_name: "{{ DOCKERHUB_USERNAME }}/api-gateway:latest"
+
   tasks:
     - name: Login to Docker Hub
-      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+      shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
 
-    - name: Build Gateway Docker image
-      command: docker build -t dohuynhan/api-gateway:latest ../api-gateway
+    - name: Build API Gateway Docker image
+      command: docker build -t {{ docker_image_name }} ../api-gateway
 
-    - name: Push Gateway Docker image
-      command: docker push dohuynhan/api-gateway:latest
+    - name: Push API Gateway Docker image
+      command: docker push {{ docker_image_name }}
 
-    - name: Run Gateway container
+    - name: Run API Gateway container
       shell: |
         docker rm -f api-gateway || true
-        docker run -d --name api-gateway -p 8888:8888 dohuynhan/api-gateway:latest
+        docker run -d --name api-gateway -p 8000:8000 {{ docker_image_name }}

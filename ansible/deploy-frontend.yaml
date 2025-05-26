@@ -1,17 +1,20 @@
 - name: Deploy Frontend Angular
   hosts: all
   become: yes
+  vars:
+    docker_image_name: "{{ DOCKERHUB_USERNAME }}/frontend-web:latest"
+
   tasks:
     - name: Login to Docker Hub
-      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+      shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Build Frontend Docker image
-      command: docker build -t dohuynhan/shop-frontend:latest ../FrontendWeb-main
+      command: docker build -t {{ docker_image_name }} ../FrontendWeb-main
 
     - name: Push Frontend Docker image
-      command: docker push dohuynhan/shop-frontend:latest
+      command: docker push {{ docker_image_name }}
 
     - name: Run Frontend container
       shell: |
-        docker rm -f shop-frontend || true
-        docker run -d --name shop-frontend -p 4200:80 dohuynhan/shop-frontend:latest
+        docker rm -f frontend-web || true
+        docker run -d --name frontend-web -p 80:80 {{ docker_image_name }}

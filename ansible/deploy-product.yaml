@@ -1,17 +1,20 @@
 - name: Deploy Product Service
   hosts: all
   become: yes
+  vars:
+    docker_image_name: "{{ DOCKERHUB_USERNAME }}/product-service:latest"
+
   tasks:
     - name: Login to Docker Hub
-      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+      shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Build Product Docker image
-      command: docker build -t dohuynhan/product-service:latest ../product-service
+      command: docker build -t {{ docker_image_name }} ../product-service
 
     - name: Push Product Docker image
-      command: docker push dohuynhan/product-service:latest
+      command: docker push {{ docker_image_name }}
 
     - name: Run Product container
       shell: |
         docker rm -f product-service || true
-        docker run -d --name product-service -p 8081:8081 dohuynhan/product-service:latest
+        docker run -d --name product-service -p 8081:8081 {{ docker_image_name }}

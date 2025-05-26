@@ -80,9 +80,29 @@ pipeline {
             }
         }*/
 
-        stage('Build war file') {
-            steps {
-                sh 'mvn clean install -DskipTests=true'
+        stage('Build Services') {
+            parallel {
+                stage('Build Auth') {
+                    steps {
+                        dir('authentication-service') {
+                            sh 'mvn clean install -DskipTests=true'
+                        }
+                    }
+                }
+                stage('Build Product') {
+                    steps {
+                        dir('product-service') {
+                            sh 'mvn clean install -DskipTests=true'
+                        }
+                    }
+                }
+                stage('Build Cart') {
+                    steps {
+                        dir('cart-service') {
+                            sh 'mvn clean install -DskipTests=true'
+                        }
+                    }
+                }
             }
         }
 

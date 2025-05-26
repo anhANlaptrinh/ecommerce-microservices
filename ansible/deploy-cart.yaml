@@ -1,0 +1,17 @@
+- name: Deploy Cart Service
+  hosts: all
+  become: yes
+  tasks:
+    - name: Login to Docker Hub
+      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+
+    - name: Build Cart Docker image
+      command: docker build -t dohuynhan/cart-service:latest ../cart-service
+
+    - name: Push Cart Docker image
+      command: docker push dohuynhan/cart-service:latest
+
+    - name: Run Cart container
+      shell: |
+        docker rm -f cart-service || true
+        docker run -d --name cart-service -p 8082:8082 dohuynhan/cart-service:latest

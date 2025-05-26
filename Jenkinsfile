@@ -8,6 +8,8 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        DOCKERHUB_USERNAME = credentials('docker')
+        DOCKERHUB_PASSWORD = credentials('docker')
     }
 
     options {
@@ -54,7 +56,7 @@ pipeline {
             }
         }
 
-        /*stage('Test Services') {
+        stage('Test Services') {
             parallel {
                 stage('Test Auth') {
                     steps {
@@ -78,7 +80,7 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
 
         stage('Build Services') {
             parallel {
@@ -158,6 +160,70 @@ pipeline {
             steps {
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
+                }
+            }
+        }
+
+        stage('Deploy Services') {
+            parallel {
+                stage('Deploy Auth') {
+                    steps {
+                        dir('ansible') {
+                            ansiblePlaybook credentialsId: 'ssh',
+                                            installation: 'ansible',
+                                            inventory: '/etc/ansible/hosts',
+                                            playbook: 'deploy-auth.yaml',
+                                            disableHostKeyChecking: true
+                        }
+                    }
+                }
+
+                stage('Deploy Product') {
+                    steps {
+                        dir('ansible') {
+                            ansiblePlaybook credentialsId: 'ssh',
+                                            installation: 'ansible',
+                                            inventory: '/etc/ansible/hosts',
+                                            playbook: 'deploy-product.yaml',
+                                            disableHostKeyChecking: true
+                        }
+                    }
+                }
+
+                stage('Deploy Cart') {
+                    steps {
+                        dir('ansible') {
+                            ansiblePlaybook credentialsId: 'ssh',
+                                            installation: 'ansible',
+                                            inventory: '/etc/ansible/hosts',
+                                            playbook: 'deploy-cart.yaml',
+                                            disableHostKeyChecking: true
+                        }
+                    }
+                }
+
+                stage('Deploy Gateway') {
+                    steps {
+                        dir('ansible') {
+                            ansiblePlaybook credentialsId: 'ssh',
+                                            installation: 'ansible',
+                                            inventory: '/etc/ansible/hosts',
+                                            playbook: 'deploy-gateway.yaml',
+                                            disableHostKeyChecking: true
+                        }
+                    }
+                }
+
+                stage('Deploy Frontend') {
+                    steps {
+                        dir('ansible') {
+                            ansiblePlaybook credentialsId: 'ssh',
+                                            installation: 'ansible',
+                                            inventory: '/etc/ansible/hosts',
+                                            playbook: 'deploy-frontend.yaml',
+                                            disableHostKeyChecking: true
+                        }
+                    }
                 }
             }
         }

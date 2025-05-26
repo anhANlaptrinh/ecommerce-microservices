@@ -1,0 +1,17 @@
+- name: Deploy Product Service
+  hosts: all
+  become: yes
+  tasks:
+    - name: Login to Docker Hub
+      shell: echo "{{ lookup('env','DOCKERHUB_PASSWORD') }}" | docker login -u "{{ lookup('env','DOCKERHUB_USERNAME') }}" --password-stdin
+
+    - name: Build Product Docker image
+      command: docker build -t dohuynhan/product-service:latest ../product-service
+
+    - name: Push Product Docker image
+      command: docker push dohuynhan/product-service:latest
+
+    - name: Run Product container
+      shell: |
+        docker rm -f product-service || true
+        docker run -d --name product-service -p 8081:8081 dohuynhan/product-service:latest

@@ -8,8 +8,8 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKERHUB_USERNAME = credentials('docker')
-        DOCKERHUB_PASSWORD = credentials('docker')
+        DOCKERHUB_USERNAME = credentials('docker-username')
+        DOCKERHUB_PASSWORD = credentials('docker-password')
     }
 
     options {

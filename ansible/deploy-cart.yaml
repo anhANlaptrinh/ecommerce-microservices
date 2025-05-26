@@ -1,21 +1,33 @@
 - name: Deploy Cart Service
   hosts: all
-  become: yes
+  become: true
   vars:
-    docker_image_name: "{{ DOCKERHUB_USERNAME }}/cart-service:latest"
-    service_path: "/home/ubuntu/agent/workspace/ecommerce-microservices/cart-service"
+    container_name: cart-service
+    image_name: dohuynhan/cart-service:latest
+    app_port: 8082
 
   tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
     - name: Login to Docker Hub
       shell: echo "{{ DOCKERHUB_PASSWORD }}" | docker login -u "{{ DOCKERHUB_USERNAME }}" --password-stdin
+      register: login_result
+      changed_when: "'Login Succeeded' in login_result.stdout"
 
-    - name: Build Cart Docker image
-      command: docker build -t {{ docker_image_name }} {{ service_path }}
+    - name: Stop and remove old container if exists
+      shell: docker rm -f {{ container_name }} || true
 
-    - name: Push Cart Docker image
-      command: docker push {{ docker_image_name }}
+    - name: Pull latest Docker image
+      shell: docker pull {{ image_name }}
 
-    - name: Run Cart container
+    - name: Run new container
       shell: |
-        docker rm -f cart-service || true
-        docker run -d --name cart-service -p 8082:8082 {{ docker_image_name }}
+        docker run -d \
+          --name {{ container_name }} \
+          -p {{ app_port }}:{{ app_port }} \
+          --restart unless-stopped \
+          {{ image_name }}

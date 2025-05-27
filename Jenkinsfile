@@ -337,6 +337,11 @@ pipeline {
     post {
         always {
             cleanWs()
+            sh '''
+                echo "[CLEANUP] Dọn dẹp container và image không dùng..."
+                docker container prune -f
+                docker image prune -a -f
+            '''
         }
     }
 }

@@ -107,6 +107,73 @@ pipeline {
             }
         }
 
+        stage('Build & Push Docker Images') {
+            parallel {
+                stage('Docker Login') {
+                    steps {
+                        sh """
+                            echo ${DOCKER_CREDENTIALS_PSW} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin
+                        """
+                    }
+                }
+
+                stage('Docker Image - Auth') {
+                    steps {
+                        dir('authentication-service') {
+                            sh """
+                                docker build -t dohuynhan/auth-service:latest .
+                                docker push dohuynhan/auth-service:latest
+                            """
+                        }
+                    }
+                }
+
+                stage('Docker Image - Product') {
+                    steps {
+                        dir('product-service') {
+                            sh """
+                                docker build -t dohuynhan/product-service:latest .
+                                docker push dohuynhan/product-service:latest
+                            """
+                        }
+                    }
+                }
+
+                stage('Docker Image - Cart') {
+                    steps {
+                        dir('cart-service') {
+                            sh """
+                                docker build -t dohuynhan/cart-service:latest .
+                                docker push dohuynhan/cart-service:latest
+                            """
+                        }
+                    }
+                }
+
+                stage('Docker Image - Gateway') {
+                    steps {
+                        dir('api-gateway') {
+                            sh """
+                                docker build -t dohuynhan/api-gateway:latest .
+                                docker push dohuynhan/api-gateway:latest
+                            """
+                        }
+                    }
+                }
+
+                stage('Docker Image - Frontend') {
+                    steps {
+                        dir('FrontendWeb-main') {
+                            sh """
+                                docker build -t dohuynhan/frontend-web:latest .
+                                docker push dohuynhan/frontend-web:latest
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
         stage("OWASP Dependency Check") {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --format XML', odcInstallation: 'DP-Check'

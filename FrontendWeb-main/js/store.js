@@ -1,8 +1,9 @@
+const API_BASE_URL = 'http://master.myjenkins.click:8888';
 function initStore() {
-  const request1 = fetch('/api/products').then((response) =>
+  const request1 = fetch(`${API_BASE_URL}/api/products`).then((response) =>
     response.json()
   );
-  const request2 = fetch('/api/categories').then((response) =>
+  const request2 = fetch(`${API_BASE_URL}/api/categories`).then((response) =>
     response.json()
   );
   Promise.all([request1, request2])

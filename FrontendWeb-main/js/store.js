@@ -1,8 +1,8 @@
 function initStore() {
-  const request1 = fetch('http://localhost:8888/api/products').then((response) =>
+  const request1 = fetch('/api/products').then((response) =>
     response.json()
   );
-  const request2 = fetch('http://localhost:8888/api/categories').then((response) =>
+  const request2 = fetch('/api/categories').then((response) =>
     response.json()
   );
   Promise.all([request1, request2])
@@ -190,7 +190,7 @@ document.getElementById('filter-button').addEventListener('click', () => {
   if (minPrice !== null) queryParams.append('minPrice', minPrice);
   if (maxPrice !== null) queryParams.append('maxPrice', maxPrice);
 
-  fetch(`http://localhost:8888/api/products/filter?${queryParams.toString()}`)
+  fetch(`/api/products/filter?${queryParams.toString()}`)
     .then(res => res.json())
     .then(data => {
       const container = document.querySelector('.product-list-store');

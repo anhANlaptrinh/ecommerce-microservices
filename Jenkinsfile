@@ -52,6 +52,13 @@ pipeline {
                         }
                     }
                 }
+                stage('Compile Gateway') {
+                    steps {
+                        dir('api-gateway') {
+                            sh 'mvn clean compile'
+                        }
+                    }
+                }
             }
         }
 
@@ -111,7 +118,6 @@ pipeline {
                         }
                     }
                 }
-
             }
         }
 
@@ -129,7 +135,8 @@ pipeline {
                     steps {
                         dir('authentication-service') {
                             sh """
-                                docker build -t dohuynhan/auth-service:latest .
+                                docker rmi -f dohuynhan/auth-service:latest || true
+                                docker build --no-cache -t dohuynhan/auth-service:latest .
                                 docker push dohuynhan/auth-service:latest
                             """
                         }
@@ -140,7 +147,8 @@ pipeline {
                     steps {
                         dir('product-service') {
                             sh """
-                                docker build -t dohuynhan/product-service:latest .
+                                docker rmi -f dohuynhan/product-service:latest || true
+                                docker build --no-cache -t dohuynhan/product-service:latest .
                                 docker push dohuynhan/product-service:latest
                             """
                         }
@@ -151,7 +159,8 @@ pipeline {
                     steps {
                         dir('cart-service') {
                             sh """
-                                docker build -t dohuynhan/cart-service:latest .
+                                docker rmi -f dohuynhan/cart-service:latest || true
+                                docker build --no-cache -t dohuynhan/cart-service:latest .
                                 docker push dohuynhan/cart-service:latest
                             """
                         }
@@ -162,7 +171,8 @@ pipeline {
                     steps {
                         dir('api-gateway') {
                             sh """
-                                docker build -t dohuynhan/api-gateway:latest .
+                                docker rmi -f dohuynhan/api-gateway:latest || true
+                                docker build --no-cache -t dohuynhan/api-gateway:latest .
                                 docker push dohuynhan/api-gateway:latest
                             """
                         }
@@ -173,7 +183,8 @@ pipeline {
                     steps {
                         dir('FrontendWeb-main') {
                             sh """
-                                docker build -t dohuynhan/frontend-web:latest .
+                                docker rmi -f dohuynhan/frontend-web:latest || true
+                                docker build --no-cache -t dohuynhan/frontend-web:latest .
                                 docker push dohuynhan/frontend-web:latest
                             """
                         }
@@ -182,7 +193,7 @@ pipeline {
             }
         }
 
-        stage("OWASP Dependency Check") {
+        stage('OWASP Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --format XML', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'

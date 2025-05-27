@@ -21,6 +21,9 @@
     - name: Stop and remove old container if exists
       shell: docker rm -f {{ container_name }} || true
 
+    - name: Remove old image if exists
+      shell: docker rmi -f {{ image_name }} || true
+
     - name: Pull latest Docker image
       shell: docker pull {{ image_name }}
 

@@ -55,7 +55,7 @@ pipeline {
             }
         }
 
-        /*stage('Test Services') {
+        stage('Test Services') {
             parallel {
                 stage('Test Auth') {
                     steps {
@@ -79,7 +79,7 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
 
         stage('Build Services') {
             parallel {

@@ -104,6 +104,14 @@ pipeline {
                         }
                     }
                 }
+                stage('Build Gateway') {
+                    steps {
+                        dir('api-gateway') {
+                            sh 'mvn clean install -DskipTests=true'
+                        }
+                    }
+                }
+
             }
         }
 

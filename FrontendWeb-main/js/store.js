@@ -190,7 +190,7 @@ document.getElementById('filter-button').addEventListener('click', () => {
   if (minPrice !== null) queryParams.append('minPrice', minPrice);
   if (maxPrice !== null) queryParams.append('maxPrice', maxPrice);
 
-  fetch(`/api/products/filter?${queryParams.toString()}`)
+  fetch(`http://localhost:8888/api/products/filter?${queryParams.toString()}`)
     .then(res => res.json())
     .then(data => {
       const container = document.querySelector('.product-list-store');

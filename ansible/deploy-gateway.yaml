@@ -4,7 +4,7 @@
   vars:
     container_name: api-gateway
     image_name: dohuynhan/api-gateway:latest
-    app_port: 8088
+    app_port: 8888
 
   tasks:
     - name: Ensure Docker is installed

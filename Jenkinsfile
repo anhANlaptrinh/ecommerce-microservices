@@ -29,13 +29,6 @@ pipeline {
             }
         }
 
-        stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --format XML', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
-
         stage('Maven Compile') {
             parallel {
                 stage('Compile Auth') {
@@ -128,6 +121,13 @@ pipeline {
             }
         }
 
+        stage('OWASP Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --format XML', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
         stage('Build & Push Docker Images') {
             parallel {
                 stage('Docker Login') {
@@ -204,32 +204,32 @@ pipeline {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh 'trivy image -f html -o trivy-auth.html --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest'
-                        archiveArtifacts artifacts: 'trivy-auth.html', allowEmptyArchive: true
+                        sh 'trivy image -f table -o trivy-auth.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest'
+                        archiveArtifacts artifacts: 'trivy-auth.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh 'trivy image -f html -o trivy-product.html --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest'
-                        archiveArtifacts artifacts: 'trivy-product.html', allowEmptyArchive: true
+                        sh 'trivy image -f table -o trivy-product.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest'
+                        archiveArtifacts artifacts: 'trivy-product.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh 'trivy image -f html -o trivy-cart.html --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest'
-                        archiveArtifacts artifacts: 'trivy-cart.html', allowEmptyArchive: true
+                        sh 'trivy image -f table -o trivy-cart.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest'
+                        archiveArtifacts artifacts: 'trivy-cart.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh 'trivy image -f html -o trivy-gateway.html --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest'
-                        archiveArtifacts artifacts: 'trivy-gateway.html', allowEmptyArchive: true
+                        sh 'trivy image -f table -o trivy-gateway.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest'
+                        archiveArtifacts artifacts: 'trivy-gateway.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh 'trivy image -f html -o trivy-frontend.html --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest'
-                        archiveArtifacts artifacts: 'trivy-frontend.html', allowEmptyArchive: true
+                        sh 'trivy image -f table -o trivy-frontend.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest'
+                        archiveArtifacts artifacts: 'trivy-frontend.txt', allowEmptyArchive: true
                     }
                 }
             }

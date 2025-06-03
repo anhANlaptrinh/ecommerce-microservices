@@ -9,6 +9,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
+        TRIVY_CACHE_DIR = '/tmp/trivy-cache'
     }
 
     options {
@@ -204,31 +205,31 @@ pipeline {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh 'trivy image -f table -o trivy-auth.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest'
+                        sh 'trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest'
                         archiveArtifacts artifacts: 'trivy-auth.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh 'trivy image -f table -o trivy-product.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest'
+                        sh 'trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest'
                         archiveArtifacts artifacts: 'trivy-product.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh 'trivy image -f table -o trivy-cart.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest'
+                        sh 'trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest'
                         archiveArtifacts artifacts: 'trivy-cart.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh 'trivy image -f table -o trivy-gateway.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest'
+                        sh 'trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest'
                         archiveArtifacts artifacts: 'trivy-gateway.txt', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh 'trivy image -f table -o trivy-frontend.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest'
+                        sh 'trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest'
                         archiveArtifacts artifacts: 'trivy-frontend.txt', allowEmptyArchive: true
                     }
                 }

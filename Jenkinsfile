@@ -207,45 +207,50 @@ pipeline {
                     steps {
                         sh '''
                             mkdir -p $TRIVY_CACHE_DIR
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest
+                            export LANG=en_US.UTF-8
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest
                         '''
-                        archiveArtifacts artifacts: 'trivy-auth.txt', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-auth.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
                         sh '''
                             mkdir -p $TRIVY_CACHE_DIR
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest
+                            export LANG=en_US.UTF-8
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest
                         '''
-                        archiveArtifacts artifacts: 'trivy-product.txt', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-product.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
                         sh '''
                             mkdir -p $TRIVY_CACHE_DIR
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest
+                            export LANG=en_US.UTF-8
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest
                         '''
-                        archiveArtifacts artifacts: 'trivy-cart.txt', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-cart.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
                         sh '''
                             mkdir -p $TRIVY_CACHE_DIR
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest
+                            export LANG=en_US.UTF-8
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest
                         '''
-                        archiveArtifacts artifacts: 'trivy-gateway.txt', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-gateway.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
                         sh '''
                             mkdir -p $TRIVY_CACHE_DIR
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.txt --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest
+                            export LANG=en_US.UTF-8
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest
                         '''
-                        archiveArtifacts artifacts: 'trivy-frontend.txt', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-frontend.log', allowEmptyArchive: true
                     }
                 }
             }

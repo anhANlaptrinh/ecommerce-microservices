@@ -9,5 +9,5 @@ variable "name_prefix" {
 
 variable "volume_size" {
   type    = number
-  default = 40
+  default = 30
 }

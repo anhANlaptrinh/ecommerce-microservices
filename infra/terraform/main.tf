@@ -12,6 +12,14 @@ module "jenkins_agent" {
   key_name       = var.key_name
 }
 
+module "k8s_nodes" {
+  source        = "./modules/k8s-nodes"
+  ami           = var.ami
+  instance_type  = var.instance_type
+  key_name      = var.key_name
+  name_prefix   = "k8s"
+}
+
 resource "cloudflare_record" "jenkins_master" {
   zone_id = var.cloudflare_zone_id
   name    = "master"

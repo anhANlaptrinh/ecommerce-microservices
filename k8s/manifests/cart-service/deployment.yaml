@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  labels:
+    app: cart-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: dohuynhan/cart-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: DB_HOST
+              value: ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: cart_service
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cart-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cart-secrets
+                  key: db-password

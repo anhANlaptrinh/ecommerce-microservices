@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  labels:
+    app: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          image: dohuynhan/product-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: DB_HOST
+              value: ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: product_service
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: product-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: product-secrets
+                  key: db-password

@@ -10,6 +10,7 @@ pipeline {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
         TRIVY_CACHE_DIR = '/tmp/trivy-cache'
+        IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
     options {
@@ -143,9 +144,9 @@ pipeline {
                     steps {
                         dir('authentication-service') {
                             sh """
-                                docker rmi -f dohuynhan/auth-service:latest || true
-                                docker build --no-cache -t dohuynhan/auth-service:latest .
-                                docker push dohuynhan/auth-service:latest
+                                docker rmi -f dohuynhan/auth-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/auth-service:${IMAGE_TAG} .
+                                docker push dohuynhan/auth-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -155,9 +156,9 @@ pipeline {
                     steps {
                         dir('product-service') {
                             sh """
-                                docker rmi -f dohuynhan/product-service:latest || true
-                                docker build --no-cache -t dohuynhan/product-service:latest .
-                                docker push dohuynhan/product-service:latest
+                                docker rmi -f dohuynhan/product-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/product-service:${IMAGE_TAG} .
+                                docker push dohuynhan/product-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -167,9 +168,9 @@ pipeline {
                     steps {
                         dir('cart-service') {
                             sh """
-                                docker rmi -f dohuynhan/cart-service:latest || true
-                                docker build --no-cache -t dohuynhan/cart-service:latest .
-                                docker push dohuynhan/cart-service:latest
+                                docker rmi -f dohuynhan/cart-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/cart-service:${IMAGE_TAG} .
+                                docker push dohuynhan/cart-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -179,9 +180,9 @@ pipeline {
                     steps {
                         dir('api-gateway') {
                             sh """
-                                docker rmi -f dohuynhan/api-gateway:latest || true
-                                docker build --no-cache -t dohuynhan/api-gateway:latest .
-                                docker push dohuynhan/api-gateway:latest
+                                docker rmi -f dohuynhan/api-gateway:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/api-gateway:${IMAGE_TAG} .
+                                docker push dohuynhan/api-gateway:${IMAGE_TAG}
                             """
                         }
                     }
@@ -191,12 +192,27 @@ pipeline {
                     steps {
                         dir('FrontendWeb-main') {
                             sh """
-                                docker rmi -f dohuynhan/frontend-web:latest || true
-                                docker build --no-cache -t dohuynhan/frontend-web:latest .
-                                docker push dohuynhan/frontend-web:latest
+                                docker rmi -f dohuynhan/frontend-web:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/frontend-web:${IMAGE_TAG} .
+                                docker push dohuynhan/frontend-web:${IMAGE_TAG}
                             """
                         }
                     }
+                }
+            }
+        }
+
+        stage('Commit YAML Update') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-https-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                    sh """
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@example.com"
+                        git remote set-url origin https://${GIT_USER}:${GIT_PASS}@github.com/anhANlaptrinh/ecommerce-microservices.git
+                        git add k8s/manifests/**/deployment.yaml
+                        git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
+                        git push origin main
+                    """
                 }
             }
         }
@@ -205,51 +221,51 @@ pipeline {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-auth.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-product.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-cart.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-gateway.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-frontend.log', allowEmptyArchive: true
                     }
                 }
@@ -305,6 +321,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy Services') {
             parallel {
                 stage('Deploy Auth') {
@@ -389,6 +406,7 @@ pipeline {
             }
         }
     }
+    */
 
     post {
         always {

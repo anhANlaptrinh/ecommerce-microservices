@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://master.myjenkins.click:8888';
+const API_BASE_URL = 'http://localhost:8888';
 function initStore() {
   const request1 = fetch(`${API_BASE_URL}/api/products`).then((response) =>
     response.json()

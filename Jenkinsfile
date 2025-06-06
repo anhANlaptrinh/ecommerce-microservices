@@ -228,9 +228,11 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                     sh """
+                        git checkout main
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@example.com"
                         git remote set-url origin https://${GITHUB_TOKEN}@github.com/anhANlaptrinh/ecommerce-microservices.git
+                        git pull origin main
                         git add k8s/manifests/**/deployment.yaml
                         git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push origin main

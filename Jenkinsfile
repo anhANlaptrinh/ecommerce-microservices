@@ -10,6 +10,7 @@ pipeline {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
         TRIVY_CACHE_DIR = '/tmp/trivy-cache'
+        IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
     options {
@@ -18,6 +19,19 @@ pipeline {
     }
 
     stages {
+        stage('Check Commit Message') {
+            steps {
+                script {
+                    def lastCommitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    if (lastCommitMessage.startsWith("ci: update image tags")) {
+                        echo "Detected auto-commit from Jenkins. Skipping build to avoid infinite loop."
+                        currentBuild.result = 'SUCCESS'
+                        error("Stopping pipeline triggered by auto-commit.")
+                    }
+                }
+            }
+        }
+
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -68,21 +82,43 @@ pipeline {
                 stage('Test Auth') {
                     steps {
                         dir('authentication-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=auth_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                JWT_SECRET=MY_SUPER_SECRET_KEY_FOR_JWT_1234567890 \
+                                mvn test
+                            '''
                         }
                     }
                 }
                 stage('Test Product') {
                     steps {
                         dir('product-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=product_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                mvn test
+                            '''
                         }
                     }
                 }
                 stage('Test Cart') {
                     steps {
                         dir('cart-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=cart_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                mvn test
+                            '''
                         }
                     }
                 }
@@ -143,9 +179,9 @@ pipeline {
                     steps {
                         dir('authentication-service') {
                             sh """
-                                docker rmi -f dohuynhan/auth-service:latest || true
-                                docker build --no-cache -t dohuynhan/auth-service:latest .
-                                docker push dohuynhan/auth-service:latest
+                                docker rmi -f dohuynhan/auth-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/auth-service:${IMAGE_TAG} .
+                                docker push dohuynhan/auth-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -155,9 +191,9 @@ pipeline {
                     steps {
                         dir('product-service') {
                             sh """
-                                docker rmi -f dohuynhan/product-service:latest || true
-                                docker build --no-cache -t dohuynhan/product-service:latest .
-                                docker push dohuynhan/product-service:latest
+                                docker rmi -f dohuynhan/product-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/product-service:${IMAGE_TAG} .
+                                docker push dohuynhan/product-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -167,9 +203,9 @@ pipeline {
                     steps {
                         dir('cart-service') {
                             sh """
-                                docker rmi -f dohuynhan/cart-service:latest || true
-                                docker build --no-cache -t dohuynhan/cart-service:latest .
-                                docker push dohuynhan/cart-service:latest
+                                docker rmi -f dohuynhan/cart-service:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/cart-service:${IMAGE_TAG} .
+                                docker push dohuynhan/cart-service:${IMAGE_TAG}
                             """
                         }
                     }
@@ -179,9 +215,9 @@ pipeline {
                     steps {
                         dir('api-gateway') {
                             sh """
-                                docker rmi -f dohuynhan/api-gateway:latest || true
-                                docker build --no-cache -t dohuynhan/api-gateway:latest .
-                                docker push dohuynhan/api-gateway:latest
+                                docker rmi -f dohuynhan/api-gateway:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/api-gateway:${IMAGE_TAG} .
+                                docker push dohuynhan/api-gateway:${IMAGE_TAG}
                             """
                         }
                     }
@@ -191,12 +227,34 @@ pipeline {
                     steps {
                         dir('FrontendWeb-main') {
                             sh """
-                                docker rmi -f dohuynhan/frontend-web:latest || true
-                                docker build --no-cache -t dohuynhan/frontend-web:latest .
-                                docker push dohuynhan/frontend-web:latest
+                                docker rmi -f dohuynhan/frontend-web:${IMAGE_TAG} || true
+                                docker build --no-cache -t dohuynhan/frontend-web:${IMAGE_TAG} .
+                                docker push dohuynhan/frontend-web:${IMAGE_TAG}
                             """
                         }
                     }
+                }
+            }
+        }
+
+        stage('Commit YAML Update') {
+            steps {
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    sh """
+                        git checkout main
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@example.com"
+                        git remote set-url origin https://${GITHUB_TOKEN}@github.com/anhANlaptrinh/ecommerce-microservices.git
+                        git pull origin main
+                        sed -i "s|image: .*/auth-service:.*|image: dohuynhan/auth-service:${IMAGE_TAG}|" k8s/manifests/auth-service/deployment.yaml
+                        sed -i "s|image: .*/product-service:.*|image: dohuynhan/product-service:${IMAGE_TAG}|" k8s/manifests/product-service/deployment.yaml
+                        sed -i "s|image: .*/cart-service:.*|image: dohuynhan/cart-service:${IMAGE_TAG}|" k8s/manifests/cart-service/deployment.yaml
+                        sed -i "s|image: .*/api-gateway:.*|image: dohuynhan/api-gateway:${IMAGE_TAG}|" k8s/manifests/api-gateway/deployment.yaml
+                        sed -i "s|image: .*/frontend-web:.*|image: dohuynhan/frontend-web:${IMAGE_TAG}|" k8s/manifests/frontend/deployment.yaml
+                        git add k8s/manifests/**/deployment.yaml
+                        git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
+                        git push origin main
+                    """
                 }
             }
         }
@@ -205,51 +263,51 @@ pipeline {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-auth.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-product.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-cart.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-gateway.log', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh '''
+                        sh """
                             mkdir -p $TRIVY_CACHE_DIR
                             export LANG=en_US.UTF-8
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:latest
-                        '''
+                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
+                        """
                         archiveArtifacts artifacts: 'trivy-frontend.log', allowEmptyArchive: true
                     }
                 }
@@ -305,6 +363,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy Services') {
             parallel {
                 stage('Deploy Auth') {
@@ -388,6 +447,7 @@ pipeline {
                 }
             }
         }
+        */
     }
 
     post {

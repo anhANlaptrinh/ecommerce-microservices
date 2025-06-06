@@ -24,10 +24,10 @@ let listCategories = [];
 let listBlogs = [];
 function initApp() {
   //Fetch dữ liệu từ file json
-  const request1 = fetch('http://localhost:8888/api/products').then((response) =>
+  const request1 = fetch('https://api-gateway.myjenkins.click/api/products').then((response) =>
     response.json()
   );
-  const request2 = fetch('http://localhost:8888/api/categories').then((response) =>
+  const request2 = fetch('https://api-gateway.myjenkins.click/api/categories').then((response) =>
     response.json()
   );
   const request3 = fetch('./data/Blogs.json').then((response) =>
@@ -398,7 +398,7 @@ function getProductById(id) {
  */
 function addToCart(productId) {
   // 1. Gửi request xác thực (cookie đã kèm theo)
-  fetch('http://localhost:8888/api/auth/hello', {
+  fetch('https://api-gateway.myjenkins.click/api/auth/hello', {
     method: 'GET',
     credentials: 'include'
   })
@@ -412,7 +412,7 @@ function addToCart(productId) {
     const quantity = input_quantity ? Number(input_quantity.value) : 1;
 
     // 2. Gọi API thêm sản phẩm vào giỏ hàng
-    return fetch('http://localhost:8888/api/cart/items', {
+    return fetch('https://api-gateway.myjenkins.click/api/cart/items', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -445,7 +445,7 @@ function deleteCart(productId) {
     return;
   }
 
-  fetch(`http://localhost:8888/api/cart/items/${productId}`, {
+  fetch(`https://api-gateway.myjenkins.click/api/cart/items/${productId}`, {
     method: 'DELETE',
     headers: {
       'X-USER-ID': userId
@@ -458,7 +458,7 @@ function deleteCart(productId) {
     .then(cart => {
       if (cart.items.length === 0) {
         // Nếu giỏ trống, gọi API xoá giỏ luôn
-        return fetch('http://localhost:8888/api/cart', {
+        return fetch('https://api-gateway.myjenkins.click/api/cart', {
           method: 'DELETE',
           headers: {
             'X-USER-ID': userId
@@ -487,7 +487,7 @@ function loadCartToHTML() {
     return;
   }
 
-  fetch('http://localhost:8888/api/cart', {
+  fetch('https://api-gateway.myjenkins.click/api/cart', {
     headers: {
       'X-USER-ID': userId
     }
@@ -577,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         localStorage.removeItem("username");
         // Gửi yêu cầu đến backend để xác thực với các tài khoản khác
-        fetch("http://localhost:8888/api/auth/login", {
+        fetch("https://api-gateway.myjenkins.click/api/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -622,7 +622,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const email = document.getElementById("register-email").value;
       const password = document.getElementById("register-password").value;
 
-      fetch("http://localhost:8888/api/auth/register", {
+      fetch("https://api-gateway.myjenkins.click/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -647,7 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  fetch("http://localhost:8888/api/auth/hello", {
+  fetch("https://api-gateway.myjenkins.click/api/auth/hello", {
     method: "GET",
     credentials: "include"
   })

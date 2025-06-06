@@ -1,6 +1,6 @@
 function initDashBoardProduct() {
   //Fetch dữ liệu từ file json
-  fetch("http://localhost:8888/api/products")
+  fetch("https://api-gateway.myjenkins.click/api/products")
     .then((response) => response.json())
     .then((response) => {
       listProducts = response;

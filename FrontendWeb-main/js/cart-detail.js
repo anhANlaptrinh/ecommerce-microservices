@@ -1,5 +1,5 @@
 function initCartDetail() {
-  fetch("http://localhost:8888/api/products")
+  fetch("https://api-gateway.myjenkins.click/api/products")
     .then((response) => response.json())
     .then((response) => {
       listProducts = response;
@@ -31,7 +31,7 @@ function deleteCart(productId) {
     return;
   }
 
-  fetch(`http://localhost:8888/api/cart/items/${productId}`, {
+  fetch(`https://api-gateway.myjenkins.click/api/cart/items/${productId}`, {
     method: 'DELETE',
     headers: {
       'X-USER-ID': userId
@@ -43,7 +43,7 @@ function deleteCart(productId) {
     })
     .then(cart => {
       if (cart.items.length === 0) {
-        return fetch('http://localhost:8888/api/cart', {
+        return fetch('https://api-gateway.myjenkins.click/api/cart', {
           method: 'DELETE',
           headers: {
             'X-USER-ID': userId
@@ -71,7 +71,7 @@ function loadCartDetail() {
     return;
   }
 
-  fetch(`http://localhost:8888/api/cart`, {
+  fetch(`https://api-gateway.myjenkins.click/api/cart`, {
     method: 'GET',
     headers: {
       'X-USER-ID': userId
@@ -164,7 +164,7 @@ function minusQuantity(productId) {
     return;
   }
 
-  fetch(`http://localhost:8888/api/cart/items/${productId}/decrease`, {
+  fetch(`https://api-gateway.myjenkins.click/api/cart/items/${productId}/decrease`, {
     method: 'PUT',
     headers: {
       'X-USER-ID': userId
@@ -194,7 +194,7 @@ function plusQuantity(productId) {
     return;
   }
 
-  fetch('http://localhost:8888/api/cart/items', {
+  fetch('https://api-gateway.myjenkins.click/api/cart/items', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

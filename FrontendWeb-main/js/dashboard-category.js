@@ -1,5 +1,5 @@
 function initDashBoardProduct() {
-  fetch("http://localhost:8888/api/categories")
+  fetch("https://api-gateway.myjenkins.click/api/categories")
     .then((response) => response.json())
     .then((response) => {
       listCategories = response;

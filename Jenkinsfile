@@ -65,7 +65,7 @@ pipeline {
         }
 
         stage('Test Services') {
-            parallel {
+            stages {
                 stage('Test Auth') {
                     steps {
                         dir('authentication-service') {

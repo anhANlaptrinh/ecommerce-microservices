@@ -233,6 +233,11 @@ pipeline {
                         git config user.email "jenkins@example.com"
                         git remote set-url origin https://${GITHUB_TOKEN}@github.com/anhANlaptrinh/ecommerce-microservices.git
                         git pull origin main
+                        sed -i "s|image: .*/auth-service:.*|image: dohuynhan/auth-service:${IMAGE_TAG}|" k8s/manifests/auth-service/deployment.yaml
+                        sed -i "s|image: .*/product-service:.*|image: dohuynhan/product-service:${IMAGE_TAG}|" k8s/manifests/product-service/deployment.yaml
+                        sed -i "s|image: .*/cart-service:.*|image: dohuynhan/cart-service:${IMAGE_TAG}|" k8s/manifests/cart-service/deployment.yaml
+                        sed -i "s|image: .*/api-gateway:.*|image: dohuynhan/api-gateway:${IMAGE_TAG}|" k8s/manifests/api-gateway/deployment.yaml
+                        sed -i "s|image: .*/frontend-web:.*|image: dohuynhan/frontend-web:${IMAGE_TAG}|" k8s/manifests/frontend/deployment.yaml
                         git add k8s/manifests/**/deployment.yaml
                         git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push origin main

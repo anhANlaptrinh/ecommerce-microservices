@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: dohuynhan/api-gateway:v98
+          image: dohuynhan/api-gateway:v99
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8888

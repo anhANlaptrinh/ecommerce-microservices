@@ -69,21 +69,43 @@ pipeline {
                 stage('Test Auth') {
                     steps {
                         dir('authentication-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=auth_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                JWT_SECRET=MY_SUPER_SECRET_KEY_FOR_JWT_1234567890 \
+                                mvn test
+                            '''
                         }
                     }
                 }
                 stage('Test Product') {
                     steps {
                         dir('product-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=product_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                mvn test
+                            '''
                         }
                     }
                 }
                 stage('Test Cart') {
                     steps {
                         dir('cart-service') {
-                            sh 'mvn test'
+                            sh '''
+                                DB_HOST=ecommerce-db.ch8mugaw6zy6.ap-southeast-2.rds.amazonaws.com \
+                                DB_PORT=5432 \
+                                DB_NAME=cart_service \
+                                DB_USER=postgres \
+                                DB_PASSWORD=Tangnhatdang2004 \
+                                mvn test
+                            '''
                         }
                     }
                 }

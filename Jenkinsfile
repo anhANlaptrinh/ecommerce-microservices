@@ -19,6 +19,19 @@ pipeline {
     }
 
     stages {
+        stage('Check Commit Message') {
+            steps {
+                script {
+                    def lastCommitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    if (lastCommitMessage.startsWith("ci: update image tags")) {
+                        echo "Detected auto-commit from Jenkins. Skipping build to avoid infinite loop."
+                        currentBuild.result = 'SUCCESS'
+                        error("Stopping pipeline triggered by auto-commit.")
+                    }
+                }
+            }
+        }
+
         stage('Clean Workspace') {
             steps {
                 cleanWs()

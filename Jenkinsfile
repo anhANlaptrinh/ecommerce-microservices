@@ -204,7 +204,7 @@ pipeline {
 
         stage('Commit YAML Update') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-https-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                     sh """
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@example.com"

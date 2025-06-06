@@ -226,11 +226,11 @@ pipeline {
 
         stage('Commit YAML Update') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                     sh """
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@example.com"
-                        git remote set-url origin https://${GIT_USER}:${GIT_PASS}@github.com/anhANlaptrinh/ecommerce-microservices.git
+                        git remote set-url origin https://${GITHUB_TOKEN}@github.com/anhANlaptrinh/ecommerce-microservices.git
                         git add k8s/manifests/**/deployment.yaml
                         git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push origin main

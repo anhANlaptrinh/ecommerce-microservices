@@ -314,6 +314,25 @@ pipeline {
             }
         }
 
+        stage('OWASP ZAP Scan Frontend') {
+            steps {
+                script {
+                    def targetUrl = "https://frontend.myjenkins.click"
+
+                    sh """
+                        docker run --rm -v \$PWD:/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py \
+                            -t ${targetUrl} -g gen.conf -r zap-report.html || true
+                    """
+                    archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
+                    publishHTML(target: [
+                        reportDir: '.',
+                        reportFiles: 'zap-report.html',
+                        reportName: 'OWASP ZAP Report'
+                    ])
+                }
+            }
+        }
+
         stage('SonarQube Scan') {
             steps {
                 script {

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: dohuynhan/frontend-web:v132
+          image: dohuynhan/frontend-web:v134
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

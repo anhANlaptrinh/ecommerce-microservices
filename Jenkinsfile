@@ -334,11 +334,6 @@ pipeline {
                             -t ${targetUrl} -g gen.conf -r zap-report.html || true
                     """
                     archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
-                    publishHTML(target: [
-                        reportDir: '.',
-                        reportFiles: 'zap-report.html',
-                        reportName: 'OWASP ZAP Report'
-                    ])
                 }
             }
         }

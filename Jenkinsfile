@@ -10,7 +10,6 @@ pipeline {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
-        TRIVY_TMP_DIR   = "${WORKSPACE}/.trivy-tmp"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -263,9 +262,9 @@ pipeline {
         stage('Prepare Trivy DB') {
             steps {
                 sh """
-                    mkdir -p $TRIVY_CACHE_DIR $TRIVY_TMP_DIR
+                    mkdir -p $TRIVY_CACHE_DIR
                     export LANG=en_US.UTF-8
-                    trivy image --download-db-only --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR || true
+                    trivy image --download-db-only --cache-dir $TRIVY_CACHE_DIR || true
                 """
             }
         }
@@ -275,7 +274,7 @@ pipeline {
                 stage('Scan Auth Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR \
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
                                 -f json -o trivy-auth.json --exit-code 0 \
                                 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
                         """
@@ -285,7 +284,7 @@ pipeline {
                 stage('Scan Product Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR \
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
                                 -f json -o trivy-product.json --exit-code 0 \
                                 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
                         """
@@ -295,7 +294,7 @@ pipeline {
                 stage('Scan Cart Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR \
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
                                 -f json -o trivy-cart.json --exit-code 0 \
                                 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
                         """
@@ -305,7 +304,7 @@ pipeline {
                 stage('Scan Gateway Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR \
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
                                 -f json -o trivy-gateway.json --exit-code 0 \
                                 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
                         """
@@ -315,7 +314,7 @@ pipeline {
                 stage('Scan Frontend Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR --tempdir $TRIVY_TMP_DIR \
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
                                 -f json -o trivy-frontend.json --exit-code 0 \
                                 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
                         """

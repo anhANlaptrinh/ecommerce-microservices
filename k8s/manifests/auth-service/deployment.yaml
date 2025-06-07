@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: dohuynhan/auth-service:v138
+          image: dohuynhan/auth-service:v140
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

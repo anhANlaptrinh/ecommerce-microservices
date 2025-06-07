@@ -9,7 +9,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
-        TRIVY_CACHE_DIR = '/tmp/trivy-cache'
+        TRIVY_CACHE_DIR = "${env.WORKSPACE}/.trivy-cache"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -259,13 +259,21 @@ pipeline {
             }
         }
 
+        stage('Prepare Trivy DB') {
+            steps {
+                sh """
+                    mkdir -p $TRIVY_CACHE_DIR
+                    export LANG=en_US.UTF-8
+                    trivy image --download-db-only --cache-dir $TRIVY_CACHE_DIR || true
+                """
+            }
+        }
+
         stage('Trivy Scan Docker Images') {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
                         sh """
-                            mkdir -p $TRIVY_CACHE_DIR
-                            export LANG=en_US.UTF-8
                             trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
                         """
                         archiveArtifacts artifacts: 'trivy-auth.log', allowEmptyArchive: true
@@ -274,8 +282,6 @@ pipeline {
                 stage('Scan Product Image') {
                     steps {
                         sh """
-                            mkdir -p $TRIVY_CACHE_DIR
-                            export LANG=en_US.UTF-8
                             trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
                         """
                         archiveArtifacts artifacts: 'trivy-product.log', allowEmptyArchive: true
@@ -284,8 +290,6 @@ pipeline {
                 stage('Scan Cart Image') {
                     steps {
                         sh """
-                            mkdir -p $TRIVY_CACHE_DIR
-                            export LANG=en_US.UTF-8
                             trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
                         """
                         archiveArtifacts artifacts: 'trivy-cart.log', allowEmptyArchive: true
@@ -294,8 +298,6 @@ pipeline {
                 stage('Scan Gateway Image') {
                     steps {
                         sh """
-                            mkdir -p $TRIVY_CACHE_DIR
-                            export LANG=en_US.UTF-8
                             trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
                         """
                         archiveArtifacts artifacts: 'trivy-gateway.log', allowEmptyArchive: true
@@ -304,8 +306,6 @@ pipeline {
                 stage('Scan Frontend Image') {
                     steps {
                         sh """
-                            mkdir -p $TRIVY_CACHE_DIR
-                            export LANG=en_US.UTF-8
                             trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
                         """
                         archiveArtifacts artifacts: 'trivy-frontend.log', allowEmptyArchive: true

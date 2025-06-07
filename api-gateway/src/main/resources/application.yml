@@ -15,21 +15,23 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
 
-      # Các route
       routes:
         - id: auth-service
-          uri: http://auth-service:8080
+          uri: http://auth-service.auth-service:8080
           predicates:
             - Path=/api/auth/**
+
         - id: product-service
-          uri: http://product-service:8081
+          uri: http://product-service.product-service:8081
           predicates:
             - Path=/api/products/**
+
         - id: category-service
-          uri: http://product-service:8081
+          uri: http://product-service.product-service:8081
           predicates:
             - Path=/api/categories/**
+
         - id: cart-service
-          uri: http://cart-service:8082
+          uri: http://cart-service.cart-service:8082
           predicates:
             - Path=/api/cart/**

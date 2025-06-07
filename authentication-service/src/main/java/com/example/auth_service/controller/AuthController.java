@@ -34,11 +34,16 @@ public class AuthController {
 
         Cookie cookie = new Cookie("token", authResponse.getToken());
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(259200);
-
+        cookie.setDomain("myjenkins.click");
         response.addCookie(cookie);
+
+        response.setHeader("Set-Cookie", String.format(
+                "token=%s; Path=/; Max-Age=259200; HttpOnly; Secure; SameSite=None; Domain=myjenkins.click",
+                authResponse.getToken()
+        ));
         return authResponse;
     }
 

@@ -37,7 +37,6 @@ public class AuthController {
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(259200);
-        cookie.setDomain("myjenkins.click");
         response.addCookie(cookie);
 
         response.setHeader("Set-Cookie", String.format(

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class CartServiceImpl implements CartService {
 
-    private static final String PRODUCT_URL = "http://product-service:8081/api/products/";
+    private static final String PRODUCT_URL = "http://product-service.product-service:8081/";
 
     private final CartRepository cartRepo;
     private final CartItemRepository itemRepo;

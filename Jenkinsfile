@@ -363,8 +363,7 @@ pipeline {
             }
         }
 
-        /*
-        stage('Deploy Services') {
+        /*stage('Deploy Services') {
             parallel {
                 stage('Deploy Auth') {
                     steps {
@@ -446,8 +445,7 @@ pipeline {
                     }
                 }
             }
-        }
-        */
+        }*/
     }
 
     post {

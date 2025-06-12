@@ -9,7 +9,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
-        TRIVY_CACHE_DIR = "${env.WORKSPACE}/.trivy-cache"
+        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -274,42 +274,66 @@ pipeline {
                 stage('Scan Auth Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-auth.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
+                                -f json -o trivy-auth.json --exit-code 0 \
+                                --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
                         """
-                        archiveArtifacts artifacts: 'trivy-auth.log', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-auth.json', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-product.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
+                                -f json -o trivy-product.json --exit-code 0 \
+                                --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
                         """
-                        archiveArtifacts artifacts: 'trivy-product.log', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-product.json', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-cart.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
+                                -f json -o trivy-cart.json --exit-code 0 \
+                                --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
                         """
-                        archiveArtifacts artifacts: 'trivy-cart.log', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-cart.json', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-gateway.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
+                                -f json -o trivy-gateway.json --exit-code 0 \
+                                --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
                         """
-                        archiveArtifacts artifacts: 'trivy-gateway.log', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-gateway.json', allowEmptyArchive: true
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR -f table -o trivy-frontend.log --exit-code 0 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
+                            trivy image --cache-dir $TRIVY_CACHE_DIR \
+                                -f json -o trivy-frontend.json --exit-code 0 \
+                                --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
                         """
-                        archiveArtifacts artifacts: 'trivy-frontend.log', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'trivy-frontend.json', allowEmptyArchive: true
                     }
+                }
+            }
+        }
+
+        stage('OWASP ZAP Scan Frontend') {
+            steps {
+                script {
+                    def targetUrl = "https://frontend.myjenkins.click"
+
+                    sh """
+                        docker run --rm -v \$PWD:/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py \
+                            -t ${targetUrl} -g gen.conf -r zap-report.html || true
+                    """
+                    archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
                 }
             }
         }

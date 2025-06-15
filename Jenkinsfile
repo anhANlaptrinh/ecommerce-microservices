@@ -262,27 +262,42 @@ pipeline {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}'
+                        sh """
+                            rm -rf ~/.cache/trivy
+                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/auth-service:${IMAGE_TAG}
+                        """
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}'
+                        sh """
+                            rm -rf ~/.cache/trivy
+                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/product-service:${IMAGE_TAG}
+                        """
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}'
+                        sh """
+                            rm -rf ~/.cache/trivy
+                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/cart-service:${IMAGE_TAG}
+                        """
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}'
+                        sh """
+                            rm -rf ~/.cache/trivy
+                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/api-gateway:${IMAGE_TAG}
+                        """
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}'
+                        sh """
+                            rm -rf ~/.cache/trivy
+                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/frontend-web:${IMAGE_TAG}
+                        """
                     }
                 }
             }

@@ -237,46 +237,89 @@ pipeline {
             }
         }
 
-        stage('Trivy DB Update') {
-            steps {
-                sh "trivy image --download-db-only --cache-dir ${TRIVY_CACHE_DIR}"
-            }
-        }
-
         stage('Trivy Scan Docker Images') {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/auth-service:${IMAGE_TAG}
+                            trivy image \
+                                --scanners vuln \
+                                --skip-db-update \
+                                --skip-java-db-update \
+                                --no-progress \
+                                --cache-dir ${TRIVY_CACHE_DIR} \
+                                --exit-code 1 \
+                                --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
+                                dohuynhan/auth-service:${IMAGE_TAG}
                         """
                     }
                 }
+
                 stage('Scan Product Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/product-service:${IMAGE_TAG}
+                            trivy image \
+                                --scanners vuln \
+                                --skip-db-update \
+                                --skip-java-db-update \
+                                --no-progress \
+                                --cache-dir ${TRIVY_CACHE_DIR} \
+                                --exit-code 1 \
+                                --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
+                                dohuynhan/product-service:${IMAGE_TAG}
                         """
                     }
                 }
+
                 stage('Scan Cart Image') {
                     steps {
                         sh """
-                             trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/cart-service:${IMAGE_TAG}
+                            trivy image \
+                                --scanners vuln \
+                                --skip-db-update \
+                                --skip-java-db-update \
+                                --no-progress \
+                                --cache-dir ${TRIVY_CACHE_DIR} \
+                                --exit-code 1 \
+                                --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
+                                dohuynhan/cart-service:${IMAGE_TAG}
                         """
                     }
                 }
+
                 stage('Scan Gateway Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/api-gateway:${IMAGE_TAG}
+                            trivy image \
+                                --scanners vuln \
+                                --skip-db-update \
+                                --skip-java-db-update \
+                                --no-progress \
+                                --cache-dir ${TRIVY_CACHE_DIR} \
+                                --exit-code 1 \
+                                --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
+                                dohuynhan/api-gateway:${IMAGE_TAG}
                         """
                     }
                 }
+
                 stage('Scan Frontend Image') {
                     steps {
                         sh """
-                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/frontend-web:${IMAGE_TAG}
+                            trivy image \
+                                --scanners vuln \
+                                --skip-db-update \
+                                --skip-java-db-update \
+                                --no-progress \
+                                --cache-dir ${TRIVY_CACHE_DIR} \
+                                --exit-code 1 \
+                                --severity HIGH,CRITICAL \
+                                --ignore-unfixed \
+                                dohuynhan/frontend-web:${IMAGE_TAG}
                         """
                     }
                 }

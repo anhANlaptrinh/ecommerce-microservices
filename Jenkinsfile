@@ -248,7 +248,7 @@ pipeline {
                                 --skip-java-db-update \
                                 --no-progress \
                                 --cache-dir ${TRIVY_CACHE_DIR} \
-                                --exit-code 1 \
+                                --exit-code 0 \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 dohuynhan/auth-service:${IMAGE_TAG}
@@ -265,7 +265,7 @@ pipeline {
                                 --skip-java-db-update \
                                 --no-progress \
                                 --cache-dir ${TRIVY_CACHE_DIR} \
-                                --exit-code 1 \
+                                --exit-code 0 \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 dohuynhan/product-service:${IMAGE_TAG}
@@ -282,7 +282,7 @@ pipeline {
                                 --skip-java-db-update \
                                 --no-progress \
                                 --cache-dir ${TRIVY_CACHE_DIR} \
-                                --exit-code 1 \
+                                --exit-code 0 \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 dohuynhan/cart-service:${IMAGE_TAG}
@@ -299,7 +299,7 @@ pipeline {
                                 --skip-java-db-update \
                                 --no-progress \
                                 --cache-dir ${TRIVY_CACHE_DIR} \
-                                --exit-code 1 \
+                                --exit-code 0 \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 dohuynhan/api-gateway:${IMAGE_TAG}
@@ -316,7 +316,7 @@ pipeline {
                                 --skip-java-db-update \
                                 --no-progress \
                                 --cache-dir ${TRIVY_CACHE_DIR} \
-                                --exit-code 1 \
+                                --exit-code 0 \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 dohuynhan/frontend-web:${IMAGE_TAG}

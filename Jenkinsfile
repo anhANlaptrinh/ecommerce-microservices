@@ -9,6 +9,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
+        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -236,6 +237,52 @@ pipeline {
             }
         }
 
+        stage('Trivy DB Update') {
+            steps {
+                sh "trivy image --download-db-only --cache-dir ${TRIVY_CACHE_DIR}"
+            }
+        }
+
+        stage('Trivy Scan Docker Images') {
+            parallel {
+                stage('Scan Auth Image') {
+                    steps {
+                        sh """
+                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/auth-service:${IMAGE_TAG}
+                        """
+                    }
+                }
+                stage('Scan Product Image') {
+                    steps {
+                        sh """
+                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/product-service:${IMAGE_TAG}
+                        """
+                    }
+                }
+                stage('Scan Cart Image') {
+                    steps {
+                        sh """
+                             trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/cart-service:${IMAGE_TAG}
+                        """
+                    }
+                }
+                stage('Scan Gateway Image') {
+                    steps {
+                        sh """
+                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/api-gateway:${IMAGE_TAG}
+                        """
+                    }
+                }
+                stage('Scan Frontend Image') {
+                    steps {
+                        sh """
+                            trivy image --cache-dir ${TRIVY_CACHE_DIR} --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/frontend-web:${IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Commit YAML Update') {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
@@ -254,51 +301,6 @@ pipeline {
                         git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push origin main
                     """
-                }
-            }
-        }
-
-        stage('Trivy Scan Docker Images') {
-            parallel {
-                stage('Scan Auth Image') {
-                    steps {
-                        sh """
-                            rm -rf ~/.cache/trivy
-                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/auth-service:${IMAGE_TAG}
-                        """
-                    }
-                }
-                stage('Scan Product Image') {
-                    steps {
-                        sh """
-                            rm -rf ~/.cache/trivy
-                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/product-service:${IMAGE_TAG}
-                        """
-                    }
-                }
-                stage('Scan Cart Image') {
-                    steps {
-                        sh """
-                            rm -rf ~/.cache/trivy
-                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/cart-service:${IMAGE_TAG}
-                        """
-                    }
-                }
-                stage('Scan Gateway Image') {
-                    steps {
-                        sh """
-                            rm -rf ~/.cache/trivy
-                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/api-gateway:${IMAGE_TAG}
-                        """
-                    }
-                }
-                stage('Scan Frontend Image') {
-                    steps {
-                        sh """
-                            rm -rf ~/.cache/trivy
-                            trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed dohuynhan/frontend-web:${IMAGE_TAG}
-                        """
-                    }
                 }
             }
         }

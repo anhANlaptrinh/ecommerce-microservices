@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: cart-service
-          image: dohuynhan/cart-service:v148
+          image: dohuynhan/cart-service:v150
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082

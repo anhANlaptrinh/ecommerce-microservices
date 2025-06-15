@@ -9,7 +9,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
-        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
+        TRIVY_CACHE_DIR = "/var/cache/trivy"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 

@@ -9,7 +9,6 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS = credentials('docker')
-        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -259,66 +258,31 @@ pipeline {
             }
         }
 
-        stage('Prepare Trivy DB') {
-            steps {
-                sh """
-                    mkdir -p $TRIVY_CACHE_DIR
-                    export LANG=en_US.UTF-8
-                    trivy image --download-db-only --cache-dir $TRIVY_CACHE_DIR || true
-                """
-            }
-        }
-
         stage('Trivy Scan Docker Images') {
             parallel {
                 stage('Scan Auth Image') {
                     steps {
-                        sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR \
-                                -f json -o trivy-auth.json --exit-code 0 \
-                                --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}
-                        """
-                        archiveArtifacts artifacts: 'trivy-auth.json', allowEmptyArchive: true
+                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/auth-service:${IMAGE_TAG}'
                     }
                 }
                 stage('Scan Product Image') {
                     steps {
-                        sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR \
-                                -f json -o trivy-product.json --exit-code 0 \
-                                --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}
-                        """
-                        archiveArtifacts artifacts: 'trivy-product.json', allowEmptyArchive: true
+                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/product-service:${IMAGE_TAG}'
                     }
                 }
                 stage('Scan Cart Image') {
                     steps {
-                        sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR \
-                                -f json -o trivy-cart.json --exit-code 0 \
-                                --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}
-                        """
-                        archiveArtifacts artifacts: 'trivy-cart.json', allowEmptyArchive: true
+                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/cart-service:${IMAGE_TAG}'
                     }
                 }
                 stage('Scan Gateway Image') {
                     steps {
-                        sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR \
-                                -f json -o trivy-gateway.json --exit-code 0 \
-                                --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}
-                        """
-                        archiveArtifacts artifacts: 'trivy-gateway.json', allowEmptyArchive: true
+                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/api-gateway:${IMAGE_TAG}'
                     }
                 }
                 stage('Scan Frontend Image') {
                     steps {
-                        sh """
-                            trivy image --cache-dir $TRIVY_CACHE_DIR \
-                                -f json -o trivy-frontend.json --exit-code 0 \
-                                --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}
-                        """
-                        archiveArtifacts artifacts: 'trivy-frontend.json', allowEmptyArchive: true
+                        sh 'trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL dohuynhan/frontend-web:${IMAGE_TAG}'
                     }
                 }
             }

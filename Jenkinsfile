@@ -412,21 +412,24 @@ pipeline {
             steps {
                 script {
                     echo "Kiểm tra version trên frontend đã khớp chưa..."
-                    def maxRetries = 6
-                    def sleepSeconds = 10
                     def matched = false
 
-                    for (int i = 0; i < maxRetries; i++) {
-                        def response = sh(script: "curl -s https://frontend.myjenkins.click", returnStdout: true)
-                        def version = sh(script: "echo \"$response\" | grep -oP '<meta name=\"build-version\" content=\"\\K[^\"]+'", returnStdout: true).trim()
+                    for (int i = 1; i <= 6; i++) {
+                        def version = sh(
+                            script: '''
+                                curl -s https://frontend.myjenkins.click | \
+                                grep -oP '<meta name="build-version" content="\\K[^"]+'
+                            ''',
+                            returnStdout: true
+                        ).trim()
 
                         if (version == "${IMAGE_TAG}") {
                             echo "Frontend đang chạy đúng version: ${version}"
                             matched = true
                             break
                         } else {
-                            echo "Chưa khớp version (${version}), đợi thêm ${sleepSeconds}s..."
-                            sleep sleepSeconds
+                            echo "Chưa khớp version (${version}), đợi thêm 10s..."
+                            sleep time: 10, unit: 'SECONDS'
                         }
                     }
 

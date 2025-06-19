@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: product-service
-          image: dohuynhan/product-service:v159
+          image: dohuynhan/product-service:v164
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081

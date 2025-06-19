@@ -44,6 +44,17 @@ pipeline {
             }
         }
 
+        stage('Inject Frontend Version') {
+            steps {
+                dir('FrontendWeb-main') {
+                    sh """
+                        echo "Injecting version ${IMAGE_TAG} into index.html..."
+                        sed -i 's/__VERSION__/${IMAGE_TAG}/' ./src/index.html
+                    """
+                }
+            }
+        }
+
         stage('Maven Compile') {
             parallel {
                 stage('Compile Auth') {
@@ -393,6 +404,35 @@ pipeline {
                         git commit -m "ci: update image tags to ${IMAGE_TAG}" || echo "No changes to commit"
                         git push origin main
                     """
+                }
+            }
+        }
+
+        stage('Verify Frontend Version') {
+            steps {
+                script {
+                    echo "Kiểm tra version trên frontend đã khớp chưa..."
+                    def maxRetries = 6
+                    def sleepSeconds = 10
+                    def matched = false
+
+                    for (int i = 0; i < maxRetries; i++) {
+                        def response = sh(script: "curl -s https://frontend.myjenkins.click", returnStdout: true)
+                        def version = sh(script: "echo \"$response\" | grep -oP '<meta name=\"build-version\" content=\"\\K[^\"]+'", returnStdout: true).trim()
+
+                        if (version == "${IMAGE_TAG}") {
+                            echo "Frontend đang chạy đúng version: ${version}"
+                            matched = true
+                            break
+                        } else {
+                            echo "Chưa khớp version (${version}), đợi thêm ${sleepSeconds}s..."
+                            sleep sleepSeconds
+                        }
+                    }
+
+                    if (!matched) {
+                        error("Frontend chưa được cập nhật đúng version: ${IMAGE_TAG}")
+                    }
                 }
             }
         }

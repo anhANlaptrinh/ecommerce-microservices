@@ -49,7 +49,7 @@ pipeline {
                 dir('FrontendWeb-main') {
                     sh """
                         echo "Injecting version ${IMAGE_TAG} into index.html..."
-                        sed -i 's/__VERSION__/${IMAGE_TAG}/' ./src/index.html
+                        sed -i 's/__VERSION__/${IMAGE_TAG}/' ./index.html
                     """
                 }
             }

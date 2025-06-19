@@ -158,6 +158,55 @@ pipeline {
             }
         }
 
+        stage('SonarQube Scan') {
+            steps {
+                script {
+                    def services = [
+                        [dir: 'authentication-service', key: 'auth-service'],
+                        [dir: 'product-service', key: 'product-service'],
+                        [dir: 'cart-service', key: 'cart-service']
+                    ]
+                    for (svc in services) {
+                        dir(svc.dir) {
+                            withSonarQubeEnv('sonarqube') {
+                                sh """
+                                    $SCANNER_HOME/bin/sonar-scanner \
+                                    -Dsonar.projectKey=${svc.key} \
+                                    -Dsonar.projectName=${svc.key} \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                        }
+                    }
+
+                    dir('FrontendWeb-main') {
+                        withSonarQubeEnv('sonarqube') {
+                            sh """
+                                $SCANNER_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=frontend-web \
+                                -Dsonar.projectName=frontend-web \
+                                -Dsonar.sources=. \
+                                -Dsonar.sourceEncoding=UTF-8 \
+                                -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,**/*.spec.js,**/*.test.js \
+                                -Dsonar.coverage.jacoco.reportPaths=disabled \
+                                -Dsonar.projectVersion=${BUILD_NUMBER}
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
+                }
+            }
+        }
+
         stage('OWASP Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --format XML', odcInstallation: 'DP-Check'
@@ -358,55 +407,6 @@ pipeline {
                             -t ${targetUrl} -g gen.conf -r zap-report.html || true
                     """
                     archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
-                }
-            }
-        }
-
-        stage('SonarQube Scan') {
-            steps {
-                script {
-                    def services = [
-                        [dir: 'authentication-service', key: 'auth-service'],
-                        [dir: 'product-service', key: 'product-service'],
-                        [dir: 'cart-service', key: 'cart-service']
-                    ]
-                    for (svc in services) {
-                        dir(svc.dir) {
-                            withSonarQubeEnv('sonarqube') {
-                                sh """
-                                    $SCANNER_HOME/bin/sonar-scanner \
-                                    -Dsonar.projectKey=${svc.key} \
-                                    -Dsonar.projectName=${svc.key} \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes \
-                                    -Dsonar.sourceEncoding=UTF-8
-                                """
-                            }
-                        }
-                    }
-
-                    dir('FrontendWeb-main') {
-                        withSonarQubeEnv('sonarqube') {
-                            sh """
-                                $SCANNER_HOME/bin/sonar-scanner \
-                                -Dsonar.projectKey=frontend-web \
-                                -Dsonar.projectName=frontend-web \
-                                -Dsonar.sources=. \
-                                -Dsonar.sourceEncoding=UTF-8 \
-                                -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,**/*.spec.js,**/*.test.js \
-                                -Dsonar.coverage.jacoco.reportPaths=disabled \
-                                -Dsonar.projectVersion=${BUILD_NUMBER}
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
         }

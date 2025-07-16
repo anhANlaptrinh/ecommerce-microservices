@@ -11,7 +11,7 @@ Hệ thống thương mại điện tử hiện đại được xây dựng theo
 - **Infrastructure as Code**: Terraform + Ansible
 - **CI/CD Pipeline**: Jenkins với automated testing và deployment
 - **Container Orchestration**: Kubernetes + Docker
-- **Security Scanning**: Trivy + OWASP ZAP
+- **Security Scanning**: Trivy + OWASP ZAP + Sonarqube + OWASP Dependency-Check
 
 ## 🏗️ Kiến trúc hệ thống
 

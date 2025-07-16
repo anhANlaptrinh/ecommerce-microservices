@@ -124,7 +124,7 @@ ecommerce-microservices/
 ### Shopping Cart
 ![Shopping Cart](https://drive.google.com/uc?export=view&id=1ngzUPBebMSaKafxuTy0ZLgcl0QVyVmgp)
 
-## 🔧 DevOps Pipeline & Monitoring
+## 🔧 DevOps Pipeline
 
 ### Jenkins CI/CD Pipeline
 ![CI/CD Pipeline](https://drive.google.com/uc?export=view&id=1xQO5D6w0RHIvKqihGsJP5EE4Cmh5-4yO)

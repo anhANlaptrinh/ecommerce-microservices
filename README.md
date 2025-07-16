@@ -158,8 +158,6 @@ ecommerce-microservices/
 - **Jenkins Master**: https://master.myjenkins.click
 - **Jenkins Agent**: https://agent.myjenkins.click
 - **ArgoCD**: https://argocd.myjenkins.click
-- **Grafana**: https://grafana.myjenkins.click
-- **Prometheus**: https://prometheus.myjenkins.click
 
 ## 📊 API Endpoints
 

@@ -15,6 +15,8 @@ Hệ thống thương mại điện tử hiện đại được xây dựng theo
 
 ## 🏗️ Kiến trúc hệ thống
 
+### System Architecture Diagram
+![System Architecture](https://drive.google.com/uc?export=view&id=18ccgR0I4QLqbn2afZ2DZnJ9RAjDOafBK)
 ```
 ecommerce-microservices/
 ├── FrontendWeb-main/              # Frontend (NGINX)
@@ -50,6 +52,9 @@ ecommerce-microservices/
 └── Jenkinsfile                  # CI/CD pipeline
 ```
 
+### Microservices Flow Diagram
+![Microservices Flow](https://drive.google.com/uc?export=view&id=1xsG3CJKIbzQ5tmvCTr_Yzfl8Wa94w-gH)
+
 ## 💻 Tech Stack
 
 ### Frontend
@@ -73,6 +78,7 @@ ecommerce-microservices/
 - **Terraform** - Infrastructure as Code
 - **Ansible** - Configuration management
 - **Jenkins** - CI/CD pipeline
+- **ArgoCD** - GitOps continuous deployment
 - **AWS EC2** - Cloud infrastructure
 - **Cloudflare** - DNS management
 - **Docker Hub** - Container registry
@@ -101,10 +107,49 @@ ecommerce-microservices/
 
 ### 🔧 DevOps Features
 - **Automated CI/CD**: Jenkins pipeline với multi-stage deployment
+- **GitOps Deployment**: ArgoCD cho continuous deployment
 - **Infrastructure Automation**: Terraform modules cho AWS
 - **Security Scanning**: Automated vulnerability assessment
 - **Blue-Green Deployment**: Zero-downtime deployments
 - **Health Checks**: Service monitoring và auto-recovery
+
+## 🖼️ Screenshots & UI Preview
+
+### Homepage
+![Homepage](https://drive.google.com/uc?export=view&id=1YNM_9WKdjgum-f6QUjWyi-pMlGz1Z3-O)
+
+### Product Store
+![Product Store](https://drive.google.com/uc?export=view&id=1F8S1Srndh5esJUYjGhQ65GQQpuddHWLn)
+
+### Shopping Cart
+![Shopping Cart](https://drive.google.com/uc?export=view&id=1ngzUPBebMSaKafxuTy0ZLgcl0QVyVmgp)
+
+## 🔧 DevOps Pipeline & Monitoring
+
+### Jenkins CI/CD Pipeline
+![CI/CD Pipeline](https://drive.google.com/uc?export=view&id=1xQO5D6w0RHIvKqihGsJP5EE4Cmh5-4yO)
+
+**Pipeline Stages:**
+1. Build (Maven)
+2. Test (Unit Test)
+3. SAST (Sonarqube)
+4. DP-Check (Dependency-Check)
+5. Build + Push + Scan Container (Docker + Trivy)
+6. Push updated YAML to Git
+7. DAST (OWASP ZAP)
+
+### Jenkins Dashboard
+![Jenkins Dashboard](https://drive.google.com/uc?export=view&id=1PLh425FO3FqSBJsal0WTyTkMvC9XFkY-)
+
+### ArgoCD GitOps Dashboard
+![ArgoCD Dashboard](https://drive.google.com/uc?export=view&id=1DityzNVrw6eg96HaqaX1aOyz_wvdj0o0)
+
+**ArgoCD Applications:**
+- Frontend Application
+- API Gateway
+- Authentication Service
+- Product Service
+- Cart Service
 
 ## 🌐 URLs
 
@@ -112,6 +157,9 @@ ecommerce-microservices/
 - **API Gateway**: https://api-gateway.myjenkins.click
 - **Jenkins Master**: https://master.myjenkins.click
 - **Jenkins Agent**: https://agent.myjenkins.click
+- **ArgoCD**: https://argocd.myjenkins.click
+- **Grafana**: https://grafana.myjenkins.click
+- **Prometheus**: https://prometheus.myjenkins.click
 
 ## 📊 API Endpoints
 
@@ -151,6 +199,7 @@ DELETE /api/cart            - Clear cart
 - Terraform
 - kubectl
 - AWS CLI
+- ArgoCD CLI
 ```
 
 ### 1. Clone Repository
@@ -168,7 +217,20 @@ terraform plan
 terraform apply
 ```
 
-### 3. Local Development
+### 3. ArgoCD Setup
+```bash
+# Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Access ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+# Get initial admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+### 4. Local Development
 ```bash
 # Build all services
 ./build-all.sh
@@ -183,7 +245,7 @@ cd product-service && mvn spring-boot:run
 cd cart-service && mvn spring-boot:run
 ```
 
-### 4. Frontend Development
+### 5. Frontend Development
 ```bash
 cd FrontendWeb-main
 # Serve with any HTTP server
@@ -205,6 +267,19 @@ kubectl get services -A
 kubectl get ingress -A
 ```
 
+### GitOps with ArgoCD
+```bash
+# Create ArgoCD application
+argocd app create ecommerce-frontend \
+  --repo https://github.com/anhANlaptrinh/ecommerce-microservices.git \
+  --path k8s/manifests/frontend \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace frontend
+
+# Sync application
+argocd app sync ecommerce-frontend
+```
+
 ### CI/CD Pipeline
 Pipeline tự động được trigger khi push code:
 
@@ -213,17 +288,9 @@ Pipeline tự động được trigger khi push code:
 3. **Docker Build**: Multi-stage builds
 4. **Push Images**: Docker Hub registry
 5. **Update Manifests**: GitOps workflow
-6. **Deploy**: Kubernetes rolling updates
+6. **ArgoCD Sync**: Automatic deployment
 7. **Verify**: Health checks + version verification
 8. **Security Test**: OWASP ZAP scanning
-
-## 📱 Responsive Design
-
-Website hỗ trợ đầy đủ các thiết bị:
-- 🖥️ Desktop (1200px+)
-- 💻 Laptop (992px - 1199px)
-- 📱 Tablet (768px - 991px)
-- 📱 Mobile (< 768px)
 
 ## 🔒 Security Features
 
@@ -233,13 +300,6 @@ Website hỗ trợ đầy đủ các thiết bị:
 - **HTTPS**: SSL/TLS encryption
 - **Network Security**: Kubernetes network policies
 - **Secret Management**: Kubernetes secrets
-
-## 📈 Monitoring & Analytics
-
-- **Business Metrics**: Doanh số, đơn hàng, conversion rate
-- **Technical Metrics**: Response time, error rates, uptime
-- **User Analytics**: Page views, user behavior tracking
-- **Infrastructure Monitoring**: Resource utilization
 
 ## 🤝 Contributing
 
@@ -267,7 +327,6 @@ make build-deploy
 ## 👨‍💻 Authors
 
 - **anhANlaptrinh** - *Initial work* - [GitHub](https://github.com/anhANlaptrinh)
-
 - **tangnhatdang2810** - *Initial work* - [GitHub](https://github.com/tangnhatdang2810)
 
 ## 🙏 Acknowledgements
@@ -277,6 +336,7 @@ make build-deploy
 - [Chart.js](https://www.chartjs.org/) - Data visualization
 - [Terraform](https://www.terraform.io/) - Infrastructure as Code
 - [Jenkins](https://www.jenkins.io/) - CI/CD automation
+- [ArgoCD](https://argo-cd.readthedocs.io/) - GitOps continuous deployment
 - [Kubernetes](https://kubernetes.io/) - Container orchestration
 
 ---

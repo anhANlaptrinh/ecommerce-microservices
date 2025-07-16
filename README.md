@@ -166,11 +166,6 @@ cd infra/terraform
 terraform init
 terraform plan
 terraform apply
-
-# Configure services with Ansible
-cd ../../ansible
-ansible-playbook -i inventory deploy-auth.yaml
-ansible-playbook -i inventory deploy-product.yaml
 ```
 
 ### 3. Local Development

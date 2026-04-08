@@ -1,19 +1,19 @@
 # 🛒 E-commerce Microservices Platform
 
-Hệ thống thương mại điện tử hiện đại được xây dựng theo kiến trúc microservices với CI/CD pipeline hoàn chỉnh và triển khai trên Kubernetes.
+A modern e-commerce platform built with a microservices architecture, a complete CI/CD pipeline, and Kubernetes deployment.
 
-## 📋 Tổng quan dự án
+## 📋 Project Overview
 
-**UIT Store** là một nền tảng thương mại điện tử gaming gear hoàn chỉnh bao gồm:
-- **Frontend Web**: Giao diện responsive với HTML, CSS, JavaScript
-- **Microservices Backend**: Kiến trúc microservices với Spring Boot + Java 21
-- **API Gateway**: Spring Cloud Gateway để định tuyến requests
+**UIT Store** is a full-featured gaming gear e-commerce platform that includes:
+- **Frontend Web**: Responsive UI built with HTML, CSS, and JavaScript
+- **Microservices Backend**: Microservices architecture using Spring Boot + Java 21
+- **API Gateway**: Spring Cloud Gateway for request routing
 - **Infrastructure as Code**: Terraform + Ansible
-- **CI/CD Pipeline**: Jenkins với automated testing và deployment
+- **CI/CD Pipeline**: Jenkins with automated testing and deployment
 - **Container Orchestration**: Kubernetes + Docker
 - **Security Scanning**: Trivy + OWASP ZAP + Sonarqube + OWASP Dependency-Check
 
-## 🏗️ Kiến trúc hệ thống
+## 🏗️ System Architecture
 
 ### System Architecture Diagram
 ![System Architecture](https://drive.google.com/uc?export=view&id=18ccgR0I4QLqbn2afZ2DZnJ9RAjDOafBK)
@@ -27,29 +27,29 @@ ecommerce-microservices/
 │   ├── src/main/java/             # Spring Cloud Gateway
 │   ├── pom.xml                    # Maven dependencies
 │   └── Dockerfile                 # Gateway container
-├── authentication-service/       # Auth Service (Port 8080)
-│   ├── src/main/java/             # Spring Boot
-│   ├── pom.xml                    # Maven config
+├── authentication-service/        # Auth Service (Port 8080)
+│   ├── src/main/java/             # Spring Boot application
+│   ├── pom.xml                    # Maven configuration
 │   └── Dockerfile                 # Multi-stage build
-├── product-service/              # Product Service (Port 8081)
+├── product-service/               # Product Service (Port 8081)
 │   ├── src/main/java/             # Product management
-│   └── Dockerfile                # Service container
-├── cart-service/                 # Cart Service (Port 8082)
+│   └── Dockerfile                 # Service container
+├── cart-service/                  # Cart Service (Port 8082)
 │   ├── src/main/java/             # Shopping cart logic
-│   └── Dockerfile                # Cart container
-├── k8s/manifests/                # Kubernetes deployments
-│   ├── frontend/                 # Frontend K8s configs
-│   ├── api-gateway/              # Gateway K8s configs
-│   ├── auth-service/             # Auth K8s configs
-│   ├── product-service/          # Product K8s configs
-│   └── cart-service/             # Cart K8s configs
-├── infra/terraform/              # Infrastructure as Code
-│   ├── modules/                  # Terraform modules
-│   │   ├── jenkins-master/       # Jenkins master setup
-│   │   ├── jenkins-agent/        # Jenkins agent setup
-│   │   └── k8s-nodes/           # Kubernetes nodes
-│   └── *.tf                     # Terraform configs
-└── Jenkinsfile                  # CI/CD pipeline
+│   └── Dockerfile                 # Cart container
+├── k8s/manifests/                 # Kubernetes deployments
+│   ├── frontend/                  # Frontend K8s configs
+│   ├── api-gateway/               # Gateway K8s configs
+│   ├── auth-service/              # Auth K8s configs
+│   ├── product-service/           # Product K8s configs
+│   └── cart-service/              # Cart K8s configs
+├── infra/terraform/               # Infrastructure as Code
+│   ├── modules/                   # Terraform modules
+│   │   ├── jenkins-master/        # Jenkins master setup
+│   │   ├── jenkins-agent/         # Jenkins agent setup
+│   │   └── k8s-nodes/             # Kubernetes nodes
+│   └── *.tf                       # Terraform configs
+└── Jenkinsfile                    # CI/CD pipeline
 ```
 
 ### Microservices Flow Diagram
@@ -88,30 +88,30 @@ ecommerce-microservices/
 - **OWASP ZAP** - Web application security testing
 - **JWT** - Authentication tokens
 
-## 🚀 Tính năng chính
+## 🚀 Key Features
 
-### 🛍️ Người dùng cuối
-- **Trang chủ**: Sản phẩm nổi bật, danh mục gaming gear
-- **Cửa hàng**: Duyệt sản phẩm theo danh mục (chuột, bàn phím, tai nghe, v.v.)
-- **Chi tiết sản phẩm**: Xem thông tin, hình ảnh chi tiết
-- **Giỏ hàng**: Thêm/xóa/cập nhật sản phẩm
-- **Xác thực**: Đăng nhập/đăng ký với JWT
-- **Blog**: Tin tức gaming và reviews sản phẩm
-- **Tìm kiếm**: Tìm kiếm thông minh với placeholder động
+### 🛍️ End User
+- **Homepage**: Featured products and gaming gear categories
+- **Store**: Browse products by category (mouse, keyboard, headset, etc.)
+- **Product Details**: View detailed information and product images
+- **Shopping Cart**: Add, remove, and update products in the cart
+- **Authentication**: Login/register using JWT-based authentication
+- **Blog**: Gaming news and product reviews
+- **Search**: Smart search with dynamic placeholders
 
 ### 👨‍💼 Admin Dashboard
-- **Analytics**: Biểu đồ doanh số, đơn hàng, lợi nhuận
-- **Quản lý sản phẩm**: CRUD operations
-- **Quản lý danh mục**: Category management
-- **Thống kê**: Dashboard với Chart.js
+- **Analytics**: Charts for revenue, orders, and profit
+- **Product Management**: Full CRUD operations for products
+- **Category Management**: Create, update, and delete categories
+- **Statistics Dashboard**: Visualized with Chart.js
 
 ### 🔧 DevOps Features
-- **Automated CI/CD**: Jenkins pipeline với multi-stage deployment
-- **GitOps Deployment**: ArgoCD cho continuous deployment
-- **Infrastructure Automation**: Terraform modules cho AWS
+- **Automated CI/CD**: Jenkins pipeline with multi-stage deployment
+- **GitOps Deployment**: ArgoCD for continuous deployment
+- **Infrastructure Automation**: Terraform modules for AWS
 - **Security Scanning**: Automated vulnerability assessment
 - **Blue-Green Deployment**: Zero-downtime deployments
-- **Health Checks**: Service monitoring và auto-recovery
+- **Health Checks**: Service monitoring and auto-recovery
 
 ## 🖼️ Screenshots & UI Preview
 
@@ -279,20 +279,20 @@ argocd app sync ecommerce-frontend
 ```
 
 ### CI/CD Pipeline
-Pipeline tự động được trigger khi push code:
+The pipeline is automatically triggered on each code push:
 
 1. **Build & Test**: Maven build + unit tests
 2. **Security Scan**: Trivy container scanning
-3. **Docker Build**: Multi-stage builds
-4. **Push Images**: Docker Hub registry
-5. **Update Manifests**: GitOps workflow
-6. **ArgoCD Sync**: Automatic deployment
-7. **Verify**: Health checks + version verification
+3. **Docker Build**: Multi-stage Docker builds
+4. **Push Images**: Push images to Docker Hub registry
+5. **Update Manifests**: GitOps workflow to update Kubernetes manifests
+6. **ArgoCD Sync**: Automatic deployment through ArgoCD
+7. **Verify**: Health checks and version verification
 8. **Security Test**: OWASP ZAP scanning
 
 ## 🔒 Security Features
 
-- **Container Scanning**: Trivy cho vulnerability assessment
+- **Container Scanning**: Trivy for vulnerability assessment
 - **Web App Security**: OWASP ZAP baseline scanning
 - **JWT Authentication**: Stateless authentication
 - **HTTPS**: SSL/TLS encryption
@@ -301,11 +301,11 @@ Pipeline tự động được trigger khi push code:
 
 ## 🤝 Contributing
 
-1. Fork repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ### Development Workflow
 ```bash
@@ -348,4 +348,4 @@ make build-deploy
 ![Languages](https://img.shields.io/badge/HCL-1.3%25-purple)
 ![Languages](https://img.shields.io/badge/Dockerfile-0.4%25-blue)
 
-⭐ **Nếu project này hữu ích, hãy cho một star!** ⭐
+⭐ **If you find this project useful, please give it a star!** ⭐
